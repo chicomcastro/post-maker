@@ -9,6 +9,8 @@ import {
   slideFileName,
   zipFileName,
 } from '../../lib/export'
+import { IconButton } from '../../components/ui'
+import { Share } from '../../components/icons'
 
 export function ExportButton({ project }: { project: Project }) {
   const { t } = useTranslation()
@@ -35,8 +37,8 @@ export function ExportButton({ project }: { project: Project }) {
   }
 
   return (
-    <button className="btn" type="button" onClick={handleExport} disabled={!!busy}>
-      {busy ?? t('editor.export')}
-    </button>
+    <IconButton label={t('editor.export')} onClick={handleExport} disabled={!!busy}>
+      <Share />
+    </IconButton>
   )
 }

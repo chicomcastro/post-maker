@@ -2,6 +2,8 @@ import { useStore } from 'zustand'
 import { useTranslation } from 'react-i18next'
 import { useEditorStore, editorTemporal } from '../../store/editorStore'
 import { PagePreview } from '../../components/PagePreview'
+import { IconButton } from '../../components/ui'
+import { Undo, Redo, Plus, Copy, Trash } from '../../components/icons'
 import { useAssetUrls } from '../../hooks/useAssetUrls'
 import { collectAssetIds } from '../../lib/project-io'
 import type { Adjustments, CollagePhoto, Page, Project } from '../../types/project'
@@ -14,31 +16,29 @@ const FILTERS: Record<string, Partial<Adjustments>> = {
   vivid: { saturation: 1.4, contrast: 1.1 },
 }
 
+const BG_COLORS = ['#0f1420', '#ffffff', '#f5e9da', '#1b3a4b', '#3a2e3f', '#c2410c']
+
 export function Toolbar() {
   const { t } = useTranslation()
   const canUndo = useStore(editorTemporal, (s) => s.pastStates.length > 0)
   const canRedo = useStore(editorTemporal, (s) => s.futureStates.length > 0)
   return (
-    <div className="toolbar">
-      <button
-        type="button"
-        className="btn btn--ghost"
+    <>
+      <IconButton
+        label={t('editor.undo')}
         disabled={!canUndo}
         onClick={() => editorTemporal.getState().undo()}
-        aria-label={t('editor.undo')}
       >
-        ↶
-      </button>
-      <button
-        type="button"
-        className="btn btn--ghost"
+        <Undo />
+      </IconButton>
+      <IconButton
+        label={t('editor.redo')}
         disabled={!canRedo}
         onClick={() => editorTemporal.getState().redo()}
-        aria-label={t('editor.redo')}
       >
-        ↷
-      </button>
-    </div>
+        <Redo />
+      </IconButton>
+    </>
   )
 }
 
@@ -65,32 +65,31 @@ export function Filmstrip({ project }: { project: Project }) {
           <PagePreview page={page} aspectRatio={project.aspectRatio} urls={urls} />
         </button>
       ))}
-      <div className="filmstrip__actions">
+      {canAdd && (
         <button
           type="button"
-          className="btn btn--ghost"
-          disabled={!canAdd}
+          className="filmstrip__add"
           onClick={() => addPage()}
+          aria-label={t('editor.addPageLabel')}
         >
-          + {t('editor.addPage')}
+          <Plus />
         </button>
-        <button
-          type="button"
-          className="btn btn--ghost"
-          disabled={!canAdd}
-          onClick={() => duplicatePage(project.pages[current].id)}
-        >
-          {t('editor.duplicatePage')}
-        </button>
-        <button
-          type="button"
-          className="btn btn--ghost"
-          disabled={project.pages.length <= 1}
-          onClick={() => removePage(project.pages[current].id)}
-        >
-          {t('editor.removePage')}
-        </button>
-      </div>
+      )}
+      <span style={{ flex: 1 }} />
+      <IconButton
+        label={t('editor.duplicatePage')}
+        disabled={!canAdd}
+        onClick={() => duplicatePage(project.pages[current].id)}
+      >
+        <Copy />
+      </IconButton>
+      <IconButton
+        label={t('editor.removePage')}
+        disabled={project.pages.length <= 1}
+        onClick={() => removePage(project.pages[current].id)}
+      >
+        <Trash />
+      </IconButton>
     </div>
   )
 }
@@ -175,7 +174,7 @@ function AdjustControls({
   )
 }
 
-/** Painel contextual: edita a foto selecionada ou a página/fundo. */
+/** Painel contextual (bottom sheet): edita a foto selecionada ou a página/fundo. */
 export function SidePanel({ project }: { project: Project }) {
   const { t } = useTranslation()
   const page = project.pages[useEditorStore((s) => s.currentPageIndex)] as Page | undefined
@@ -189,103 +188,139 @@ export function SidePanel({ project }: { project: Project }) {
 
   const photo = page.collage.find((p) => p.id === selectedPhotoId)
 
-  if (photo) {
-    const update = (updater: (p: CollagePhoto) => CollagePhoto) =>
-      updateCollagePhoto(page.id, photo.id, updater)
-    return (
-      <aside className="panel">
-        <h3>{t('editor.photo')}</h3>
-        <AdjustControls
-          adjustments={photo.adjustments}
-          onChange={(adjustments) => update((p) => ({ ...p, adjustments }))}
+  return (
+    <div className="sheet">
+      <div className="sheet__grip" />
+      {photo ? (
+        <PhotoControls
+          key={photo.id}
+          photo={photo}
+          onUpdate={(updater) => updateCollagePhoto(page.id, photo.id, updater)}
+          onFront={() => bringToFront(page.id, photo.id)}
+          onBack={() => sendToBack(page.id, photo.id)}
         />
-        <div className="panel__group">
-          <label className="checkbox">
-            <input
-              type="checkbox"
-              checked={photo.style.shadow}
-              onChange={(e) =>
-                update((p) => ({ ...p, style: { ...p.style, shadow: e.target.checked } }))
+      ) : (
+        <>
+          <h3 className="panel__title">{t('editor.background')}</h3>
+          <div className="panel__group">
+            <div className="swatches">
+              {BG_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={'swatch' + (page.bgColor === c ? ' swatch--active' : '')}
+                  style={{ background: c }}
+                  aria-label={c}
+                  onClick={() => setPageBgColor(page.id, c)}
+                />
+              ))}
+              <input
+                type="color"
+                className="swatch-input"
+                aria-label={t('editor.bgColor')}
+                value={page.bgColor}
+                onChange={(e) => setPageBgColor(page.id, e.target.value)}
+              />
+            </div>
+            <Slider
+              label={t('editor.zoom')}
+              value={page.background.transform.scale}
+              min={1}
+              max={3}
+              step={0.05}
+              onChange={(v) =>
+                updateBackground(page.id, (b) => ({
+                  ...b,
+                  transform: { ...b.transform, scale: v },
+                }))
               }
             />
-            {t('editor.shadow')}
-          </label>
-          <Slider
-            label={t('editor.border')}
-            value={photo.style.borderWidth}
-            min={0}
-            max={12}
-            step={1}
-            onChange={(v) => update((p) => ({ ...p, style: { ...p.style, borderWidth: v } }))}
-          />
-          <Slider
-            label={t('editor.corner')}
-            value={photo.frame.cornerRadius}
-            min={0}
-            max={0.25}
-            step={0.01}
-            onChange={(v) => update((p) => ({ ...p, frame: { ...p.frame, cornerRadius: v } }))}
-          />
-          <div className="filter-row">
-            <button type="button" className="chip" onClick={() => bringToFront(page.id, photo.id)}>
-              {t('editor.toFront')}
-            </button>
-            <button type="button" className="chip" onClick={() => sendToBack(page.id, photo.id)}>
-              {t('editor.toBack')}
-            </button>
+            <Slider
+              label={t('editor.panX')}
+              value={page.background.transform.x}
+              min={0}
+              max={1}
+              step={0.02}
+              onChange={(v) =>
+                updateBackground(page.id, (b) => ({ ...b, transform: { ...b.transform, x: v } }))
+              }
+            />
+            <Slider
+              label={t('editor.panY')}
+              value={page.background.transform.y}
+              min={0}
+              max={1}
+              step={0.02}
+              onChange={(v) =>
+                updateBackground(page.id, (b) => ({ ...b, transform: { ...b.transform, y: v } }))
+              }
+            />
           </div>
-        </div>
-      </aside>
-    )
-  }
+          <AdjustControls
+            adjustments={page.background.adjustments}
+            onChange={(adjustments) => updateBackground(page.id, (b) => ({ ...b, adjustments }))}
+          />
+        </>
+      )}
+    </div>
+  )
+}
 
+function PhotoControls({
+  photo,
+  onUpdate,
+  onFront,
+  onBack,
+}: {
+  photo: CollagePhoto
+  onUpdate: (updater: (p: CollagePhoto) => CollagePhoto) => void
+  onFront: () => void
+  onBack: () => void
+}) {
+  const { t } = useTranslation()
   return (
-    <aside className="panel">
-      <h3>{t('editor.background')}</h3>
+    <>
+      <h3 className="panel__title">{t('editor.photo')}</h3>
+      <AdjustControls
+        adjustments={photo.adjustments}
+        onChange={(adjustments) => onUpdate((p) => ({ ...p, adjustments }))}
+      />
       <div className="panel__group">
-        <label className="slider">
-          <span>{t('editor.bgColor')}</span>
+        <label className="switch">
+          {t('editor.shadow')}
           <input
-            type="color"
-            value={page.bgColor}
-            onChange={(e) => setPageBgColor(page.id, e.target.value)}
+            type="checkbox"
+            checked={photo.style.shadow}
+            onChange={(e) =>
+              onUpdate((p) => ({ ...p, style: { ...p.style, shadow: e.target.checked } }))
+            }
           />
         </label>
         <Slider
-          label={t('editor.zoom')}
-          value={page.background.transform.scale}
-          min={1}
-          max={3}
-          step={0.05}
-          onChange={(v) =>
-            updateBackground(page.id, (b) => ({ ...b, transform: { ...b.transform, scale: v } }))
-          }
+          label={t('editor.border')}
+          value={photo.style.borderWidth}
+          min={0}
+          max={12}
+          step={1}
+          onChange={(v) => onUpdate((p) => ({ ...p, style: { ...p.style, borderWidth: v } }))}
         />
         <Slider
-          label={t('editor.panX')}
-          value={page.background.transform.x}
+          label={t('editor.corner')}
+          value={photo.frame.cornerRadius}
           min={0}
-          max={1}
-          step={0.02}
-          onChange={(v) =>
-            updateBackground(page.id, (b) => ({ ...b, transform: { ...b.transform, x: v } }))
-          }
+          max={0.25}
+          step={0.01}
+          onChange={(v) => onUpdate((p) => ({ ...p, frame: { ...p.frame, cornerRadius: v } }))}
         />
-        <Slider
-          label={t('editor.panY')}
-          value={page.background.transform.y}
-          min={0}
-          max={1}
-          step={0.02}
-          onChange={(v) =>
-            updateBackground(page.id, (b) => ({ ...b, transform: { ...b.transform, y: v } }))
-          }
-        />
+        <div className="filter-row">
+          <button type="button" className="chip" onClick={onFront}>
+            {t('editor.toFront')}
+          </button>
+          <button type="button" className="chip" onClick={onBack}>
+            {t('editor.toBack')}
+          </button>
+        </div>
       </div>
-      <AdjustControls
-        adjustments={page.background.adjustments}
-        onChange={(adjustments) => updateBackground(page.id, (b) => ({ ...b, adjustments }))}
-      />
-    </aside>
+    </>
   )
 }
