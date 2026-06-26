@@ -16,7 +16,8 @@ marketing) está em **[`docs/ESPECIFICACAO.md`](docs/ESPECIFICACAO.md)**.
 - **Conceito:** uma foto vira o **background** da página e outras 2–3 são coladas
   por cima, em posições/ângulos variados (colagem sobre fundo)
 - **Editor:** templates pré-prontos e **customizáveis** (mover/inclinar/redimensionar)
-- **Template:** preset de **carrossel de 2–4 páginas** (~20–30 variações)
+- **Template:** **post de 1 página** ou **carrossel de 2–4 páginas** (25 no MVP —
+  ver [`docs/TEMPLATES.md`](docs/TEMPLATES.md))
 - **Proporções:** 4:5, 1:1, 9:16 — carrossel multi-página
 - **Stack:** React + Vite + TypeScript + Konva (SPA estática)
 - **Dados:** 100% local (IndexedDB) + exportar/importar projeto (`.zip`)

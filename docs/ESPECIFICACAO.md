@@ -55,7 +55,7 @@ escolhe um template, joga as fotos, ajusta o que quiser e exporta o carrossel.
 |------|---------|
 | Modelo de edição | **Templates pré-prontos + customização** (background + colagem) |
 | Estética | **Limpa / minimalista** |
-| Template | Define um **carrossel de 2–4 páginas**; cada página = 1 background + 2–3 fotos sobrepostas |
+| Template | **Post de 1 página** ou **carrossel de 2–4 páginas**; cada página = 1 background + 1–3 fotos sobrepostas |
 | Customização | Mover, **inclinar (rotacionar)** e redimensionar as fotos da colagem; reenquadrar o background |
 | Proporções | **4:5** (1080×1350), **1:1** (1080×1080), **9:16** (1080×1920) |
 | Recursos por foto | Zoom/reposicionar dentro do frame, brilho/contraste/saturação, filtros básicos |
@@ -112,10 +112,11 @@ escolhe um template, joga as fotos, ajusta o que quiser e exporta o carrossel.
 (`<input type="file" accept="image/*" multiple>` + drag-and-drop no desktop).
 Suporte a JPG, PNG, WebP e **HEIC** (via conversão client-side; ver RF-12).
 
-**RF-02 — Galeria de templates.** Templates são **presets de carrossel**
-parametrizados por: nº de páginas (2–4), nº de fotos de colagem por página
-(2–3) e proporção. As variações de posição/ângulo das fotos da colagem geram
-**~20–30 templates** no conjunto inicial.
+**RF-02 — Galeria de templates.** Templates são **presets de post (1 página) ou
+carrossel (2–4 páginas)**, parametrizados por: nº de páginas, nº de fotos de
+colagem por página (1–3), arranjo (posição/ângulo) e proporção. O conjunto
+inicial tem **25 templates** sobre 9 arranjos reutilizáveis — ver
+[`TEMPLATES.md`](TEMPLATES.md).
 
 **RF-03 — Auto-distribuição.** Ao escolher template e fotos, distribuir na
 ordem: primeira foto de cada página como background, demais como colagem.
@@ -309,8 +310,9 @@ interface Template {
 
 ## 10. Decisões tomadas
 
-- ✅ Conjunto inicial: **~20–30 templates** de carrossel (2–4 páginas; cada
-  página com background + 2–3 fotos de colagem em posições/ângulos variados).
+- ✅ Conjunto inicial: **25 templates** — posts de 1 página + carrosséis de 2–4
+  páginas; cada página com background + 1–3 fotos de colagem em posições/ângulos
+  variados. Catálogo nominal em [`TEMPLATES.md`](TEMPLATES.md).
 - ✅ Templates **pré-prontos e customizáveis** (mover/inclinar/redimensionar).
 - ✅ **Undo/redo no MVP.**
 - ✅ **Zero analytics.**
@@ -318,9 +320,11 @@ interface Template {
 - ✅ HEIC: **engatilhar lib de conversão** (`heic2any`) e validar no spike.
 - ✅ **Domínio padrão** do Pages.
 
+- ✅ Lista nominal dos templates iniciais — ver [`TEMPLATES.md`](TEMPLATES.md).
+
 ### Ainda a definir
 - [ ] Conjunto exato de filtros pré-definidos.
-- [ ] Lista nominal dos templates iniciais (esboçar grade de variações).
+- [ ] Ajuste fino das coordenadas/ângulos de cada arranjo por proporção.
 - [ ] Detalhes de gesto/UX da rotação no mobile.
 
 ---
