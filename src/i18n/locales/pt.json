@@ -1,0 +1,18 @@
+{
+  "app": {
+    "name": "Post Maker",
+    "tagline": "Voltou da viagem e não postou nada?"
+  },
+  "home": {
+    "subtitle": "Monte carrosséis lindos para o Instagram em minutos. Suas fotos não saem do seu aparelho.",
+    "create": "Criar novo",
+    "continue": "Continuar projeto",
+    "noProjects": "Você ainda não tem projetos salvos.",
+    "yourProjects": "Seus projetos"
+  },
+  "language": {
+    "label": "Idioma",
+    "pt": "Português",
+    "en": "English"
+  }
+}
