@@ -46,8 +46,33 @@
     "needPhoto": "Selecione ao menos uma foto."
   },
   "editor": {
-    "comingSoon": "O editor completo está a caminho. Por enquanto, esta é a prévia do seu projeto.",
     "page": "Página {{n}}",
-    "backHome": "Voltar para o início"
+    "backHome": "Voltar para o início",
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "addPage": "Página",
+    "duplicatePage": "Duplicar",
+    "removePage": "Remover",
+    "photo": "Foto",
+    "background": "Fundo",
+    "brightness": "Brilho",
+    "contrast": "Contraste",
+    "saturation": "Saturação",
+    "shadow": "Sombra",
+    "border": "Borda",
+    "corner": "Cantos",
+    "toFront": "Trazer à frente",
+    "toBack": "Enviar para trás",
+    "bgColor": "Cor de fundo",
+    "zoom": "Zoom",
+    "panX": "Posição X",
+    "panY": "Posição Y",
+    "filter": {
+      "original": "Original",
+      "bw": "P&B",
+      "warm": "Quente",
+      "cool": "Frio",
+      "vivid": "Vívido"
+    }
   }
 }

@@ -355,3 +355,117 @@ button {
   margin-top: 0.4rem;
   font-size: 0.85rem;
 }
+
+/* ===== Editor ===== */
+.editor .create__topbar strong {
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toolbar {
+  display: flex;
+  gap: 0.25rem;
+}
+.editor__stageWrap {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0 1rem;
+}
+.editor-stage,
+.editor__loading {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+.editor__loading {
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 4 / 5;
+  background: var(--surface);
+}
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  background: var(--surface);
+}
+.panel h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+.panel__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+.slider {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+.slider input[type='range'] {
+  width: 100%;
+}
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.filmstrip {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.75rem 0;
+  align-items: flex-start;
+}
+.filmstrip__page {
+  flex: 0 0 72px;
+  width: 72px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  overflow: hidden;
+  background: none;
+}
+.filmstrip__page--active {
+  border-color: var(--accent);
+}
+.filmstrip__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 720px) {
+  .editor {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    grid-template-areas:
+      'top top'
+      'stage panel'
+      'film film';
+    column-gap: 1.5rem;
+    align-items: start;
+  }
+  .editor .create__topbar {
+    grid-area: top;
+  }
+  .editor__stageWrap {
+    grid-area: stage;
+  }
+  .panel {
+    grid-area: panel;
+  }
+  .filmstrip {
+    grid-area: film;
+  }
+}
