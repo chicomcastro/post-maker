@@ -39,7 +39,22 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'text-summary'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/main.tsx', 'src/**/*.d.ts'],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'src/test/**',
+        'src/main.tsx',
+        'src/App.tsx',
+        'src/**/*.d.ts',
+      ],
+      // Guarda contra regressão (com folga sobre os números atuais). A lógica de
+      // domínio (lib, store, templates) deve ficar bem coberta; componentes de
+      // view pesados em canvas são excluídos pontualmente.
+      thresholds: {
+        statements: 80,
+        lines: 80,
+        functions: 75,
+        branches: 70,
+      },
     },
   },
 })
