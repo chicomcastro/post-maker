@@ -14,3 +14,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0005](0005-ci-cd-github-actions-pages.md)   | CI/CD com GitHub Actions e Pages                   | Aceito |
 | [0006](0006-i18n-pwa.md)                     | i18n (pt-BR + EN) e PWA                            | Aceito |
 | [0007](0007-roteamento-hash-router.md)       | Roteamento via Hash Router                         | Aceito |
+| [0008](0008-modelo-de-dados-e-templates.md)  | Modelo de dados, templates e estado                | Aceito |
