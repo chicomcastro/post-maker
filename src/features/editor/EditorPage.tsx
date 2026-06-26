@@ -1,8 +1,10 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useEditorStore, editorTemporal } from '../../store/editorStore'
 import { loadProject, saveProject } from '../../lib/storage'
+import { AppBar, IconButton } from '../../components/ui'
+import { ChevronLeft } from '../../components/icons'
 import { Toolbar, Filmstrip, SidePanel } from './Panels'
 import { ExportButton } from './ExportButton'
 
@@ -10,6 +12,7 @@ const EditorStage = lazy(() => import('./canvas/EditorStage'))
 
 export function EditorPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [status, setStatus] = useState<'loading' | 'ready' | 'missing'>('loading')
 
@@ -21,9 +24,8 @@ export function EditorPage() {
   const updateCollagePhoto = useEditorStore((s) => s.updateCollagePhoto)
 
   const stageWrapRef = useRef<HTMLDivElement>(null)
-  const [stageWidth, setStageWidth] = useState(360)
+  const [stageWidth, setStageWidth] = useState(320)
 
-  // Carrega o projeto no store.
   useEffect(() => {
     let active = true
     if (!id) return
@@ -42,7 +44,6 @@ export function EditorPage() {
     }
   }, [id, setProject])
 
-  // Auto-save (debounced) a cada mudança no projeto.
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
     const unsub = useEditorStore.subscribe((s, prev) => {
@@ -58,41 +59,63 @@ export function EditorPage() {
     }
   }, [])
 
-  // Mede a largura disponível para o palco.
+  const aspect = project?.aspectRatio
   useEffect(() => {
     const el = stageWrapRef.current
-    if (!el || typeof ResizeObserver === 'undefined') return
-    const ro = new ResizeObserver(() => setStageWidth(Math.min(el.clientWidth, 480)))
+    if (!el || !aspect || typeof ResizeObserver === 'undefined') return
+    const [aw, ah] = aspect.split(':').map(Number)
+    const ratio = ah / aw
+    const measure = () => {
+      const availW = el.clientWidth - 28
+      const availH = el.clientHeight - 28
+      setStageWidth(Math.max(120, Math.min(availW, availH / ratio)))
+    }
+    const ro = new ResizeObserver(measure)
     ro.observe(el)
+    measure()
     return () => ro.disconnect()
-  }, [status])
+  }, [status, aspect])
 
-  if (status === 'loading') return <main className="container" />
+  if (status === 'loading') return <div className="editor" />
   if (status === 'missing' || !project) {
     return (
-      <main className="container">
-        <p>{t('home.noProjects')}</p>
-        <Link to="/">{t('editor.backHome')}</Link>
-      </main>
+      <>
+        <AppBar
+          dark
+          left={
+            <IconButton label={t('editor.backHome')} onClick={() => navigate('/')}>
+              <ChevronLeft />
+            </IconButton>
+          }
+        />
+        <div className="route__scroll">
+          <p className="empty">{t('home.noProjects')}</p>
+        </div>
+      </>
     )
   }
 
   const page = project.pages[currentPageIndex]
 
   return (
-    <main className="container editor">
-      <header className="create__topbar">
-        <Link className="btn btn--ghost" to="/">
-          ← {t('editor.backHome')}
-        </Link>
-        <strong>{project.name}</strong>
-        <div className="editor__headerActions">
-          <Toolbar />
-          <ExportButton project={project} />
-        </div>
-      </header>
+    <div className="editor">
+      <AppBar
+        dark
+        title={project.name}
+        left={
+          <IconButton label={t('editor.backHome')} onClick={() => navigate('/')}>
+            <ChevronLeft />
+          </IconButton>
+        }
+        right={
+          <>
+            <Toolbar />
+            <ExportButton project={project} />
+          </>
+        }
+      />
 
-      <div className="editor__stageWrap" ref={stageWrapRef}>
+      <div className="editor__stage" ref={stageWrapRef}>
         <Suspense fallback={<div className="editor__loading" />}>
           {page && (
             <EditorStage
@@ -107,8 +130,8 @@ export function EditorPage() {
         </Suspense>
       </div>
 
-      <SidePanel project={project} />
       <Filmstrip project={project} />
-    </main>
+      <SidePanel project={project} />
+    </div>
   )
 }

@@ -21,10 +21,10 @@ describe('Home', () => {
     expect(screen.getByRole('button', { name: /criar novo/i })).toBeInTheDocument()
   })
 
-  it('troca o idioma para inglês', async () => {
+  it('troca o idioma para inglês pelo botão', async () => {
     await i18n.changeLanguage('pt')
     renderHome()
-    await userEvent.selectOptions(screen.getByRole('combobox'), 'en')
+    await userEvent.click(screen.getByRole('button', { name: /idioma/i }))
     expect(screen.getByRole('button', { name: /create new/i })).toBeInTheDocument()
   })
 })

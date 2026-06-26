@@ -43,7 +43,8 @@
     "convertingHeic": "Convertendo fotos do iPhone…",
     "creating": "Montando seu projeto…",
     "finish": "Criar projeto",
-    "needPhoto": "Selecione ao menos uma foto."
+    "needPhoto": "Selecione ao menos uma foto.",
+    "genericError": "Ops, algo deu errado ao montar o projeto."
   },
   "editor": {
     "page": "Página {{n}}",
@@ -51,6 +52,7 @@
     "undo": "Desfazer",
     "redo": "Refazer",
     "addPage": "Página",
+    "addPageLabel": "Adicionar página",
     "duplicatePage": "Duplicar",
     "removePage": "Remover",
     "photo": "Foto",

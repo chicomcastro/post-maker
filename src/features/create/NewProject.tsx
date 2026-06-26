@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { ASPECT_RATIOS, type AspectRatio } from '../../types/project'
 import { TEMPLATES, type Template, type TemplateKind } from '../../templates/catalog'
 import { TemplatePreview } from '../../components/TemplatePreview'
+import { AppBar, IconButton } from '../../components/ui'
+import { ChevronLeft, ImagePlus } from '../../components/icons'
 import { isImageFile } from '../../lib/images'
 import { importFiles } from '../../lib/asset-import'
 import { createProjectFromTemplate, distributePhotos } from '../../lib/project-factory'
@@ -11,6 +13,7 @@ import { saveProject } from '../../lib/storage'
 
 type Step = 'aspect' | 'template' | 'photos'
 type Filter = 'all' | TemplateKind
+const STEPS: Step[] = ['aspect', 'template', 'photos']
 
 export function NewProject() {
   const { t } = useTranslation()
@@ -28,6 +31,13 @@ export function NewProject() {
     () => TEMPLATES.filter((tpl) => filter === 'all' || tpl.kind === filter),
     [filter],
   )
+
+  function goBack() {
+    setError(null)
+    if (step === 'template') setStep('aspect')
+    else if (step === 'photos') setStep('template')
+    else navigate('/')
+  }
 
   async function handleFinish() {
     if (!template || !aspect) return
@@ -49,117 +59,113 @@ export function NewProject() {
       navigate(`/editor/${project.id}`)
     } catch {
       setBusy(null)
-      setError('Ops, algo deu errado ao montar o projeto.')
+      setError(t('create.genericError'))
     }
   }
 
+  const stepIndex = STEPS.indexOf(step)
+
   return (
-    <main className="container create">
-      <StepHeader
-        step={step}
-        onBack={() => {
-          setError(null)
-          if (step === 'template') setStep('aspect')
-          else if (step === 'photos') setStep('template')
-          else navigate('/')
-        }}
+    <>
+      <AppBar
+        left={
+          <IconButton label={t('common.back')} onClick={goBack}>
+            <ChevronLeft />
+          </IconButton>
+        }
       />
+      <div className="route__scroll">
+        <div className="progress" aria-hidden>
+          {STEPS.map((s, i) => (
+            <span
+              key={s}
+              className={'progress__seg' + (i <= stepIndex ? ' progress__seg--done' : '')}
+            />
+          ))}
+        </div>
 
-      {step === 'aspect' && (
-        <section className="create__step">
-          <h1>{t('create.stepAspect')}</h1>
-          <div className="aspect-grid">
-            {ASPECT_RATIOS.map((ar) => (
-              <button
-                key={ar}
-                type="button"
-                className="aspect-card"
-                onClick={() => {
-                  setAspect(ar)
-                  setStep('template')
-                }}
-              >
-                <span
-                  className="aspect-card__box"
-                  style={{ aspectRatio: ar.replace(':', ' / ') }}
-                />
-                <span>{t(`create.aspect.${ar}`)}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
+        {step === 'aspect' && (
+          <section className="create__step">
+            <h1>{t('create.stepAspect')}</h1>
+            <div className="aspect-grid">
+              {ASPECT_RATIOS.map((ar) => (
+                <button
+                  key={ar}
+                  type="button"
+                  className="aspect-card"
+                  onClick={() => {
+                    setAspect(ar)
+                    setStep('template')
+                  }}
+                >
+                  <span
+                    className="aspect-card__box"
+                    style={{ aspectRatio: ar.replace(':', ' / ') }}
+                  />
+                  <span>{t(`create.aspect.${ar}`)}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
-      {step === 'template' && (
-        <section className="create__step">
-          <h1>{t('create.stepTemplate')}</h1>
-          <div className="filter-row">
-            {(['all', 'post', 'carousel'] as Filter[]).map((f) => (
-              <button
-                key={f}
-                type="button"
-                className={'chip' + (filter === f ? ' chip--active' : '')}
-                onClick={() => setFilter(f)}
-              >
-                {t(
-                  f === 'all'
-                    ? 'create.filterAll'
-                    : f === 'post'
-                      ? 'create.filterPosts'
-                      : 'create.filterCarousels',
-                )}
-              </button>
-            ))}
-          </div>
-          <div className="template-grid">
-            {filteredTemplates.map((tpl) => (
-              <button
-                key={tpl.id}
-                type="button"
-                className="template-card"
-                aria-label={tpl.id}
-                onClick={() => {
-                  setTemplate(tpl)
-                  setStep('photos')
-                }}
-              >
-                <TemplatePreview template={tpl} aspectRatio={aspect ?? undefined} />
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
+        {step === 'template' && (
+          <section className="create__step">
+            <h1>{t('create.stepTemplate')}</h1>
+            <div className="segmented">
+              {(['all', 'post', 'carousel'] as Filter[]).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  className={'segmented__item' + (filter === f ? ' segmented__item--active' : '')}
+                  onClick={() => setFilter(f)}
+                >
+                  {t(
+                    f === 'all'
+                      ? 'create.filterAll'
+                      : f === 'post'
+                        ? 'create.filterPosts'
+                        : 'create.filterCarousels',
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="template-grid">
+              {filteredTemplates.map((tpl) => (
+                <button
+                  key={tpl.id}
+                  type="button"
+                  className="template-card"
+                  aria-label={tpl.id}
+                  onClick={() => {
+                    setTemplate(tpl)
+                    setStep('photos')
+                  }}
+                >
+                  <TemplatePreview template={tpl} aspectRatio={aspect ?? undefined} />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {step === 'photos' && (
+          <section className="create__step">
+            <h1>{t('create.stepPhotos')}</h1>
+            <PhotoPicker files={files} onChange={setFiles} />
+            {error && <p className="error">{error}</p>}
+          </section>
+        )}
+      </div>
 
       {step === 'photos' && (
-        <section className="create__step">
-          <h1>{t('create.stepPhotos')}</h1>
-          <PhotoPicker files={files} onChange={setFiles} />
-          {error && <p className="error">{error}</p>}
-          <div className="create__actions">
-            <button className="btn" type="button" onClick={handleFinish} disabled={!!busy}>
-              {busy ?? t('create.finish')}
-            </button>
-          </div>
-        </section>
+        <div className="bottom-cta">
+          <button className="btn btn--block" type="button" onClick={handleFinish} disabled={!!busy}>
+            {busy ?? t('create.finish')}
+          </button>
+        </div>
       )}
-    </main>
-  )
-}
-
-function StepHeader({ step, onBack }: { step: Step; onBack: () => void }) {
-  const { t } = useTranslation()
-  const order: Step[] = ['aspect', 'template', 'photos']
-  return (
-    <header className="create__topbar">
-      <button type="button" className="btn btn--ghost" onClick={onBack}>
-        ← {t('common.back')}
-      </button>
-      <div className="steps" aria-hidden>
-        {order.map((s) => (
-          <span key={s} className={'steps__dot' + (s === step ? ' steps__dot--active' : '')} />
-        ))}
-      </div>
-    </header>
+    </>
   )
 }
 
@@ -195,6 +201,7 @@ function PhotoPicker({ files, onChange }: { files: File[]; onChange: (files: Fil
           addFiles(e.dataTransfer.files)
         }}
       >
+        <ImagePlus />
         <input
           type="file"
           accept="image/*,.heic,.heif"
@@ -207,7 +214,9 @@ function PhotoPicker({ files, onChange }: { files: File[]; onChange: (files: Fil
 
       {files.length > 0 && (
         <>
-          <p className="muted">{t('create.selectedCount', { count: files.length })}</p>
+          <p className="muted" style={{ margin: '12px 2px 0' }}>
+            {t('create.selectedCount', { count: files.length })}
+          </p>
           <div className="photo-grid">
             {urls.map((url, i) => (
               <div key={i} className="photo-thumb" style={{ backgroundImage: `url(${url})` }}>

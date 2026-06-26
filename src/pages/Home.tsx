@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
+import { AppBar, IconButton } from '../components/ui'
+import { Plus, Trash } from '../components/icons'
 import { listProjects, deleteProject } from '../lib/storage'
 import type { Project } from '../types/project'
 
@@ -20,47 +22,43 @@ export function Home() {
   }
 
   return (
-    <main className="container home">
-      <header className="home__topbar">
-        <strong>{t('app.name')}</strong>
-        <LanguageSwitcher />
-      </header>
-
-      <section className="home__hero">
-        <h1>{t('app.tagline')}</h1>
-        <p>{t('home.subtitle')}</p>
-        <div className="home__actions">
-          <button className="btn" type="button" onClick={() => navigate('/new')}>
-            {t('home.create')}
+    <>
+      <AppBar title={t('app.name')} right={<LanguageSwitcher />} />
+      <div className="route__scroll">
+        <section className="hero">
+          <h1>{t('app.tagline')}</h1>
+          <p>{t('home.subtitle')}</p>
+          <button className="btn btn--block" type="button" onClick={() => navigate('/new')}>
+            <Plus /> {t('home.create')}
           </button>
-        </div>
-      </section>
+        </section>
 
-      <section className="home__projects" aria-label={t('home.yourProjects')}>
-        <h2>{t('home.yourProjects')}</h2>
+        <h2 className="section-title">{t('home.yourProjects')}</h2>
         {projects.length === 0 ? (
-          <p className="muted">{t('home.noProjects')}</p>
+          <p className="empty">{t('home.noProjects')}</p>
         ) : (
           <ul className="project-list">
             {projects.map((p) => (
-              <li key={p.id} className="project-list__item">
-                <Link to={`/editor/${p.id}`} className="project-list__link">
-                  <span className="project-list__name">{p.name}</span>
-                  <span className="muted">{t('home.pageCount', { count: p.pages.length })}</span>
-                </Link>
+              <li key={p.id} className="project-card">
                 <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={() => remove(p.id)}
-                  aria-label={t('home.deleteProject')}
-                >
-                  {t('home.deleteProject')}
-                </button>
+                  className="project-card__thumb"
+                  onClick={() => navigate(`/editor/${p.id}`)}
+                  aria-label={t('home.openProject')}
+                />
+                <div style={{ flex: 1 }} onClick={() => navigate(`/editor/${p.id}`)}>
+                  <div className="project-card__name">{p.name}</div>
+                  <div className="project-card__meta muted">
+                    {t('home.pageCount', { count: p.pages.length })}
+                  </div>
+                </div>
+                <IconButton label={t('home.deleteProject')} onClick={() => remove(p.id)}>
+                  <Trash />
+                </IconButton>
               </li>
             ))}
           </ul>
         )}
-      </section>
-    </main>
+      </div>
+    </>
   )
 }

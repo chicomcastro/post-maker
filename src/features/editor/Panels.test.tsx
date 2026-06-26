@@ -41,7 +41,7 @@ describe('Filmstrip', () => {
     await user.click(screen.getByRole('button', { name: /página 2/i }))
     expect(useEditorStore.getState().currentPageIndex).toBe(1)
 
-    await user.click(screen.getByRole('button', { name: /^\+ página$/i }))
+    await user.click(screen.getByRole('button', { name: /adicionar página/i }))
     rerender(<Filmstrip project={useEditorStore.getState().project!} />)
     expect(useEditorStore.getState().project!.pages.length).toBe(3)
 
