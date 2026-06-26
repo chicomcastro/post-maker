@@ -15,3 +15,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0006](0006-i18n-pwa.md)                     | i18n (pt-BR + EN) e PWA                            | Aceito |
 | [0007](0007-roteamento-hash-router.md)       | Roteamento via Hash Router                         | Aceito |
 | [0008](0008-modelo-de-dados-e-templates.md)  | Modelo de dados, templates e estado                | Aceito |
+| [0009](0009-fluxo-de-criacao-e-heic.md)      | Fluxo de criação e suporte a HEIC                  | Aceito |

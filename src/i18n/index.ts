@@ -20,6 +20,9 @@ void i18n
     fallbackLng: 'pt',
     supportedLngs: [...supportedLngs],
     interpolation: { escapeValue: false },
+    // As chaves de proporção contêm ':' (ex.: "4:5"); desabilitar o separador de
+    // namespace evita que o i18next interprete o ':' como divisor.
+    nsSeparator: false,
     detection: {
       order: ['localStorage', 'navigator'],
       lookupLocalStorage: 'post-maker-lang',

@@ -131,3 +131,227 @@ button {
 .home__projects h2 {
   font-size: 1.1rem;
 }
+
+/* ===== Listagem de projetos (Home) ===== */
+.project-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.project-list__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.project-list__link {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+}
+.project-list__name {
+  font-weight: 600;
+}
+
+/* ===== Fluxo de criação ===== */
+.create__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.create__step h1 {
+  font-size: 1.4rem;
+  margin: 0 0 1rem;
+}
+.create__actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+.steps {
+  display: flex;
+  gap: 0.4rem;
+}
+.steps__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+}
+.steps__dot--active {
+  background: var(--accent);
+}
+.error {
+  color: #dc2626;
+  text-align: center;
+}
+
+.aspect-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.aspect-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.aspect-card__box {
+  width: 60%;
+  background: linear-gradient(135deg, #e5e7eb, #cbd5e1);
+  border-radius: 8px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.chip--active {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.85rem;
+}
+.template-card {
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+/* ===== Previews (template e página) ===== */
+.template-preview {
+  position: relative;
+  width: 100%;
+  background: #1f2937;
+  overflow: hidden;
+}
+.template-preview__slot {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 4px;
+}
+.template-preview__badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-preview {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.page-preview__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.page-preview__photo {
+  position: absolute;
+  background-size: cover;
+  background-position: center;
+  background-color: rgba(255, 255, 255, 0.6);
+}
+.page-preview__photo--empty {
+  border: 1px dashed rgba(255, 255, 255, 0.7);
+}
+
+/* ===== Seleção de fotos ===== */
+.dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  padding: 1.5rem;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+  text-align: center;
+  cursor: pointer;
+}
+.dropzone--over {
+  border-color: var(--accent);
+  color: var(--fg);
+}
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.photo-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+}
+.photo-thumb__remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  line-height: 1;
+}
+
+/* ===== Editor (prévia) ===== */
+.slides {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.slides__item {
+  margin: 0;
+}
+.slides__item figcaption {
+  text-align: center;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+}

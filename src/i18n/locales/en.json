@@ -8,11 +8,46 @@
     "create": "Create new",
     "continue": "Continue project",
     "noProjects": "You don't have any saved projects yet.",
-    "yourProjects": "Your projects"
+    "yourProjects": "Your projects",
+    "openProject": "Open",
+    "deleteProject": "Delete",
+    "pageCount_one": "{{count}} page",
+    "pageCount_other": "{{count}} pages"
   },
   "language": {
     "label": "Language",
     "pt": "Português",
     "en": "English"
+  },
+  "common": {
+    "back": "Back",
+    "next": "Next",
+    "cancel": "Cancel"
+  },
+  "create": {
+    "stepAspect": "Choose the format",
+    "stepTemplate": "Choose a template",
+    "stepPhotos": "Select your photos",
+    "aspect": {
+      "4:5": "Feed (4:5)",
+      "1:1": "Square (1:1)",
+      "9:16": "Stories (9:16)"
+    },
+    "filterAll": "All",
+    "filterPosts": "Posts",
+    "filterCarousels": "Carousels",
+    "addPhotos": "Add photos",
+    "dropHint": "Drag photos here or tap to choose",
+    "selectedCount_one": "{{count}} photo selected",
+    "selectedCount_other": "{{count}} photos selected",
+    "convertingHeic": "Converting iPhone photos…",
+    "creating": "Building your project…",
+    "finish": "Create project",
+    "needPhoto": "Select at least one photo."
+  },
+  "editor": {
+    "comingSoon": "The full editor is on the way. For now, here's a preview of your project.",
+    "page": "Page {{n}}",
+    "backHome": "Back to home"
   }
 }
