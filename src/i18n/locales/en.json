@@ -46,8 +46,33 @@
     "needPhoto": "Select at least one photo."
   },
   "editor": {
-    "comingSoon": "The full editor is on the way. For now, here's a preview of your project.",
     "page": "Page {{n}}",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "undo": "Undo",
+    "redo": "Redo",
+    "addPage": "Page",
+    "duplicatePage": "Duplicate",
+    "removePage": "Remove",
+    "photo": "Photo",
+    "background": "Background",
+    "brightness": "Brightness",
+    "contrast": "Contrast",
+    "saturation": "Saturation",
+    "shadow": "Shadow",
+    "border": "Border",
+    "corner": "Corners",
+    "toFront": "Bring to front",
+    "toBack": "Send to back",
+    "bgColor": "Background color",
+    "zoom": "Zoom",
+    "panX": "Position X",
+    "panY": "Position Y",
+    "filter": {
+      "original": "Original",
+      "bw": "B&W",
+      "warm": "Warm",
+      "cool": "Cool",
+      "vivid": "Vivid"
+    }
   }
 }

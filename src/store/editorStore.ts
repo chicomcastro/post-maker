@@ -1,23 +1,36 @@
 import { create } from 'zustand'
 import { temporal } from 'zundo'
-import type { AspectRatio, Page, Project } from '../types/project'
+import type { Background, CollagePhoto, AspectRatio, Page, Project } from '../types/project'
 import { createPageFromArrangement } from '../lib/project-factory'
 import { createId } from '../lib/id'
 
 export interface EditorState {
   project: Project | null
   currentPageIndex: number
+  /** Foto de colagem selecionada no editor (não faz parte do histórico). */
+  selectedPhotoId: string | null
 
   setProject: (project: Project | null) => void
   rename: (name: string) => void
   setAspectRatio: (aspect: AspectRatio) => void
   setCurrentPage: (index: number) => void
+  selectPhoto: (photoId: string | null) => void
 
   updatePage: (pageId: string, updater: (page: Page) => Page) => void
   addPage: (arrangementId?: string) => void
   duplicatePage: (pageId: string) => void
   removePage: (pageId: string) => void
   reorderPages: (from: number, to: number) => void
+
+  updateBackground: (pageId: string, updater: (bg: Background) => Background) => void
+  updateCollagePhoto: (
+    pageId: string,
+    photoId: string,
+    updater: (photo: CollagePhoto) => CollagePhoto,
+  ) => void
+  setPageBgColor: (pageId: string, color: string) => void
+  bringPhotoToFront: (pageId: string, photoId: string) => void
+  sendPhotoToBack: (pageId: string, photoId: string) => void
 }
 
 const MAX_PAGES = 4
@@ -31,8 +44,11 @@ export const useEditorStore = create<EditorState>()(
     (set) => ({
       project: null,
       currentPageIndex: 0,
+      selectedPhotoId: null,
 
-      setProject: (project) => set({ project, currentPageIndex: 0 }),
+      setProject: (project) => set({ project, currentPageIndex: 0, selectedPhotoId: null }),
+
+      selectPhoto: (selectedPhotoId) => set({ selectedPhotoId }),
 
       rename: (name) =>
         set((s) => (s.project ? { project: withTimestamp({ ...s.project, name }) } : s)),
@@ -92,6 +108,28 @@ export const useEditorStore = create<EditorState>()(
           pages.splice(to, 0, moved)
           return { project: withTimestamp({ ...s.project, pages }) }
         }),
+
+      updateBackground: (pageId, updater) =>
+        set((s) =>
+          mapPage(s, pageId, (page) => ({ ...page, background: updater(page.background) })),
+        ),
+
+      updateCollagePhoto: (pageId, photoId, updater) =>
+        set((s) =>
+          mapPage(s, pageId, (page) => ({
+            ...page,
+            collage: page.collage.map((photo) => (photo.id === photoId ? updater(photo) : photo)),
+          })),
+        ),
+
+      setPageBgColor: (pageId, bgColor) =>
+        set((s) => mapPage(s, pageId, (page) => ({ ...page, bgColor }))),
+
+      bringPhotoToFront: (pageId, photoId) =>
+        set((s) => mapPage(s, pageId, (page) => reorderPhoto(page, photoId, 'front'))),
+
+      sendPhotoToBack: (pageId, photoId) =>
+        set((s) => mapPage(s, pageId, (page) => reorderPhoto(page, photoId, 'back'))),
     }),
     {
       // Histórico rastreia apenas o projeto (não o índice da página atual).
@@ -108,6 +146,24 @@ function clonePage(page: Page): Page {
     id: createId(),
     collage: page.collage.map((photo) => ({ ...structuredClone(photo), id: createId() })),
   }
+}
+
+/** Aplica um updater à página indicada e atualiza o timestamp do projeto. */
+function mapPage(
+  s: EditorState,
+  pageId: string,
+  updater: (page: Page) => Page,
+): Partial<EditorState> | EditorState {
+  if (!s.project) return s
+  const pages = s.project.pages.map((p) => (p.id === pageId ? updater(p) : p))
+  return { project: withTimestamp({ ...s.project, pages }) }
+}
+
+function reorderPhoto(page: Page, photoId: string, to: 'front' | 'back'): Page {
+  const photo = page.collage.find((p) => p.id === photoId)
+  if (!photo) return page
+  const rest = page.collage.filter((p) => p.id !== photoId)
+  return { ...page, collage: to === 'front' ? [...rest, photo] : [photo, ...rest] }
 }
 
 /** Acesso ao histórico (undo/redo). */

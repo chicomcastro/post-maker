@@ -45,6 +45,8 @@ export default defineConfig({
         'src/main.tsx',
         'src/App.tsx',
         'src/**/*.d.ts',
+        // Canvas Konva: depende de <canvas>, validado por teste manual no app.
+        'src/features/editor/canvas/**',
       ],
       // Guarda contra regressão (com folga sobre os números atuais). A lógica de
       // domínio (lib, store, templates) deve ficar bem coberta; componentes de

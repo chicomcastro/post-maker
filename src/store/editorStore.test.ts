@@ -47,6 +47,52 @@ describe('editorStore — páginas', () => {
   })
 })
 
+describe('editorStore — edição de fotos e fundo', () => {
+  it('atualiza ajustes de uma foto de colagem', () => {
+    const project = load('post-trio-scatter')
+    const page = project.pages[0]
+    const photoId = page.collage[0].id
+    useEditorStore.getState().updateCollagePhoto(page.id, photoId, (p) => ({
+      ...p,
+      adjustments: { ...p.adjustments, saturation: 0 },
+    }))
+    expect(useEditorStore.getState().project!.pages[0].collage[0].adjustments.saturation).toBe(0)
+  })
+
+  it('muda a cor de fundo da página e o zoom do background', () => {
+    const project = load('post-solo')
+    const page = project.pages[0]
+    useEditorStore.getState().setPageBgColor(page.id, '#ff0000')
+    useEditorStore.getState().updateBackground(page.id, (b) => ({
+      ...b,
+      transform: { ...b.transform, scale: 2 },
+    }))
+    const updated = useEditorStore.getState().project!.pages[0]
+    expect(updated.bgColor).toBe('#ff0000')
+    expect(updated.background.transform.scale).toBe(2)
+  })
+
+  it('reordena camadas (frente/trás)', () => {
+    const project = load('post-trio-scatter')
+    const page = project.pages[0]
+    const firstId = page.collage[0].id
+    useEditorStore.getState().bringPhotoToFront(page.id, firstId)
+    let collage = useEditorStore.getState().project!.pages[0].collage
+    expect(collage[collage.length - 1].id).toBe(firstId)
+
+    useEditorStore.getState().sendPhotoToBack(page.id, firstId)
+    collage = useEditorStore.getState().project!.pages[0].collage
+    expect(collage[0].id).toBe(firstId)
+  })
+
+  it('seleciona e deseleciona uma foto (fora do histórico)', () => {
+    load('post-solo')
+    useEditorStore.getState().selectPhoto('abc')
+    expect(useEditorStore.getState().selectedPhotoId).toBe('abc')
+    expect(editorTemporal.getState().pastStates.length).toBe(0)
+  })
+})
+
 describe('editorStore — undo/redo', () => {
   it('desfaz e refaz uma renomeação', () => {
     load('post-solo')
