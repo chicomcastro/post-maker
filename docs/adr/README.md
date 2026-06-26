@@ -17,3 +17,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0008](0008-modelo-de-dados-e-templates.md)  | Modelo de dados, templates e estado                | Aceito |
 | [0009](0009-fluxo-de-criacao-e-heic.md)      | Fluxo de criação e suporte a HEIC                  | Aceito |
 | [0010](0010-editor-konva.md)                 | Editor interativo com Konva                        | Aceito |
+| [0011](0011-exportacao-png-zip.md)           | Exportação PNG/ZIP e compartilhamento              | Aceito |

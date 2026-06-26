@@ -13,6 +13,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
+      workbox: {
+        // heic2any (~1.3MB) é carregado sob demanda; não vale precachear no SW.
+        globIgnores: ['**/heic2any-*.js'],
+      },
       manifest: {
         name: 'Post Maker',
         short_name: 'Post Maker',
@@ -47,6 +51,8 @@ export default defineConfig({
         'src/**/*.d.ts',
         // Canvas Konva: depende de <canvas>, validado por teste manual no app.
         'src/features/editor/canvas/**',
+        // Render para PNG: usa <canvas>, fora do alcance do jsdom.
+        'src/lib/export-render.ts',
       ],
       // Guarda contra regressão (com folga sobre os números atuais). A lógica de
       // domínio (lib, store, templates) deve ficar bem coberta; componentes de

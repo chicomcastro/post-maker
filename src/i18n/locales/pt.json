@@ -73,6 +73,11 @@
       "warm": "Quente",
       "cool": "Frio",
       "vivid": "Vívido"
-    }
+    },
+    "export": "Exportar",
+    "exporting": "Renderizando…",
+    "exportProgress": "Renderizando {{done}}/{{total}}…",
+    "zipping": "Empacotando…",
+    "exportError": "Não foi possível exportar. Tente novamente."
   }
 }
