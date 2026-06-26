@@ -13,12 +13,16 @@ marketing) está em **[`docs/ESPECIFICACAO.md`](docs/ESPECIFICACAO.md)**.
 
 ## Resumo das decisões do MVP
 
-- **Editor:** templates + slots (estética limpa/minimalista)
-- **Proporções:** 4:5, 1:1, 9:16 — com carrossel multi-slide
-- **Stack:** React + Vite + TypeScript (SPA estática)
-- **Dados:** 100% local (IndexedDB) + exportar/importar projeto
-- **Export:** PNGs por slide + ZIP
+- **Conceito:** uma foto vira o **background** da página e outras 2–3 são coladas
+  por cima, em posições/ângulos variados (colagem sobre fundo)
+- **Editor:** templates pré-prontos e **customizáveis** (mover/inclinar/redimensionar)
+- **Template:** preset de **carrossel de 2–4 páginas** (~20–30 variações)
+- **Proporções:** 4:5, 1:1, 9:16 — carrossel multi-página
+- **Stack:** React + Vite + TypeScript + Konva (SPA estática)
+- **Dados:** 100% local (IndexedDB) + exportar/importar projeto (`.zip`)
+- **Export:** PNGs por página + ZIP
+- **Extras:** undo/redo, conversão HEIC, zero analytics
 - **Plataforma:** mobile-first + PWA (instalável, offline)
 - **Idiomas:** pt-BR + EN
-- **Hospedagem:** GitHub Pages
+- **Hospedagem:** GitHub Pages (domínio padrão)
 - **Modelo:** grátis total
