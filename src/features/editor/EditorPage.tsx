@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useEditorStore, editorTemporal } from '../../store/editorStore'
 import { loadProject, saveProject } from '../../lib/storage'
 import { Toolbar, Filmstrip, SidePanel } from './Panels'
+import { ExportButton } from './ExportButton'
 
 const EditorStage = lazy(() => import('./canvas/EditorStage'))
 
@@ -85,7 +86,10 @@ export function EditorPage() {
           ← {t('editor.backHome')}
         </Link>
         <strong>{project.name}</strong>
-        <Toolbar />
+        <div className="editor__headerActions">
+          <Toolbar />
+          <ExportButton project={project} />
+        </div>
       </header>
 
       <div className="editor__stageWrap" ref={stageWrapRef}>
