@@ -1,29 +1,73 @@
-# Post Maker
+<div align="center">
 
-Web app (SPA) para criar **colagens de fotos prontas para Instagram** a partir
-de templates, rodando 100% no navegador e hospedado no GitHub Pages.
+# 📸 Post Maker
 
-Caso de uso central: *"voltou da viagem e não postou nada?"* — escolha um
-template, encaixe suas fotos, ajuste e exporte um carrossel em menos de 2 minutos.
+### Voltou da viagem e não postou nada?
 
-## Status
+Monte **carrosséis lindos para o Instagram** em poucos minutos —
+escolha um template, jogue suas fotos e pronto. Direto do navegador,
+de graça, e **suas fotos nunca saem do seu aparelho**.
 
-📋 **Em especificação.** A definição completa do MVP (produto, técnica e
-marketing) está em **[`docs/ESPECIFICACAO.md`](docs/ESPECIFICACAO.md)**.
+[**▶ Abrir o app**](https://chicomcastro.github.io/post-maker/)
 
-## Resumo das decisões do MVP
+</div>
 
-- **Conceito:** uma foto vira o **background** da página e outras 2–3 são coladas
-  por cima, em posições/ângulos variados (colagem sobre fundo)
-- **Editor:** templates pré-prontos e **customizáveis** (mover/inclinar/redimensionar)
-- **Template:** **post de 1 página** ou **carrossel de 2–4 páginas** (25 no MVP —
-  ver [`docs/TEMPLATES.md`](docs/TEMPLATES.md))
-- **Proporções:** 4:5, 1:1, 9:16 — carrossel multi-página
-- **Stack:** React + Vite + TypeScript + Konva (SPA estática)
-- **Dados:** 100% local (IndexedDB) + exportar/importar projeto (`.zip`)
-- **Export:** PNGs por página + ZIP
-- **Extras:** undo/redo, conversão HEIC, zero analytics
-- **Plataforma:** mobile-first + PWA (instalável, offline)
-- **Idiomas:** pt-BR + EN
-- **Hospedagem:** GitHub Pages (domínio padrão)
-- **Modelo:** grátis total
+---
+
+## ✨ O que dá pra fazer
+
+- 🖼️ **Uma foto vira o fundo** da página e outras entram em **colagem por cima**,
+  em ângulos e posições bonitas.
+- 🎠 **Posts e carrosséis** de 1 a 4 páginas, prontos para o feed.
+- 🎨 **Templates lindos e personalizáveis** — mexa, incline e redimensione cada
+  foto à vontade.
+- 📐 Formatos certos pro Instagram: **4:5**, **1:1** e **9:16**.
+- 💾 **Exporte tudo de uma vez** em imagens prontas pra postar.
+- 📱 **Instale na tela inicial** e use **offline**.
+- 🔒 **Privacidade total:** nada é enviado para servidor nenhum.
+
+## 🚀 Como funciona
+
+1. **Escolha o formato** (feed, quadrado ou stories).
+2. **Escolha um template** de post ou carrossel.
+3. **Selecione suas fotos** — elas se encaixam automaticamente.
+4. **Ajuste o que quiser** — mova, incline, troque, dê zoom.
+5. **Exporte** e poste. 🎉
+
+## 🌍 Idiomas
+
+Português 🇧🇷 e Inglês 🇺🇸.
+
+---
+
+<details>
+<summary><strong>🛠️ Detalhes técnicos</strong> (para quem quer contribuir)</summary>
+
+SPA 100% client-side, sem backend, hospedada no GitHub Pages.
+
+- **Stack:** React + TypeScript + Vite, Konva (canvas), Zustand (estado),
+  i18next (i18n), vite-plugin-pwa (PWA).
+- **Dados:** IndexedDB no dispositivo; export/import de projeto em `.zip`.
+- **Qualidade:** ESLint + Prettier + Vitest, com CI (lint, types, testes,
+  build) e CD para o Pages via GitHub Actions.
+
+### Rodando localmente
+
+```bash
+npm install
+npm run dev          # ambiente de desenvolvimento
+npm run test         # testes
+npm run build        # build de produção
+```
+
+### Documentação
+
+- [Especificação do produto](docs/ESPECIFICACAO.md)
+- [Catálogo de templates](docs/TEMPLATES.md)
+- [Decisões de arquitetura (ADRs)](docs/adr/README.md)
+
+</details>
+
+<div align="center">
+<sub>Feito com ☕ e muitas fotos de viagem.</sub>
+</div>

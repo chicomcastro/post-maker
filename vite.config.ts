@@ -1,0 +1,45 @@
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
+
+// Publicado em https://<usuario>.github.io/post-maker/ — o base precisa casar
+// com o nome do repositório no GitHub Pages (domínio padrão).
+const BASE = '/post-maker/'
+
+export default defineConfig({
+  base: BASE,
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg'],
+      manifest: {
+        name: 'Post Maker',
+        short_name: 'Post Maker',
+        description: 'Crie carrosséis de fotos lindos para o Instagram em minutos.',
+        theme_color: '#111827',
+        background_color: '#ffffff',
+        display: 'standalone',
+        start_url: BASE,
+        scope: BASE,
+        icons: [
+          { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+      },
+    }),
+  ],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
+    css: false,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'text-summary'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/main.tsx', 'src/**/*.d.ts'],
+    },
+  },
+})

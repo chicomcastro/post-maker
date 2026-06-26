@@ -37,7 +37,7 @@ escolhe um template, joga as fotos, ajusta o que quiser e exporta o carrossel.
 
 ## 2. Público-alvo e posicionamento
 
-- **Persona primária:** *Viajante / lifestyle.* Pessoa comum (não-designer) que
+- **Persona primária:** _Viajante / lifestyle._ Pessoa comum (não-designer) que
   tira muitas fotos em viagens e no dia a dia e quer postar com aparência
   caprichada sem aprender ferramenta de design.
 - **Dor:** "tenho fotos demais, não sei montar um post bonito e dá preguiça".
@@ -51,23 +51,23 @@ escolhe um template, joga as fotos, ajusta o que quiser e exporta o carrossel.
 
 ### 3.1 Dentro do escopo (MVP)
 
-| Área | Decisão |
-|------|---------|
-| Modelo de edição | **Templates pré-prontos + customização** (background + colagem) |
-| Estética | **Limpa / minimalista** |
-| Template | **Post de 1 página** ou **carrossel de 2–4 páginas**; cada página = 1 background + 1–3 fotos sobrepostas |
-| Customização | Mover, **inclinar (rotacionar)** e redimensionar as fotos da colagem; reenquadrar o background |
-| Proporções | **4:5** (1080×1350), **1:1** (1080×1080), **9:16** (1080×1920) |
-| Recursos por foto | Zoom/reposicionar dentro do frame, brilho/contraste/saturação, filtros básicos |
-| Estilo do layout | Cor de fundo (quando background não cobre tudo), borda/sombra das fotos da colagem, raio dos cantos |
-| Undo/redo | **Sim** (no MVP) |
-| Persistência | **100% local** (IndexedDB) + **exportar/importar projeto** (`.zip`) |
-| Exportação | **PNGs por página + `.zip`** quando houver múltiplas páginas |
-| Plataforma | **Mobile-first + PWA** (instalável, offline) |
-| Idiomas | **pt-BR + EN** (i18n; pt-BR padrão) |
-| Analytics | **Nenhum** |
-| Hospedagem | **GitHub Pages** em domínio padrão (`usuario.github.io/post-maker`) |
-| Monetização | **Grátis total** |
+| Área              | Decisão                                                                                                  |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| Modelo de edição  | **Templates pré-prontos + customização** (background + colagem)                                          |
+| Estética          | **Limpa / minimalista**                                                                                  |
+| Template          | **Post de 1 página** ou **carrossel de 2–4 páginas**; cada página = 1 background + 1–3 fotos sobrepostas |
+| Customização      | Mover, **inclinar (rotacionar)** e redimensionar as fotos da colagem; reenquadrar o background           |
+| Proporções        | **4:5** (1080×1350), **1:1** (1080×1080), **9:16** (1080×1920)                                           |
+| Recursos por foto | Zoom/reposicionar dentro do frame, brilho/contraste/saturação, filtros básicos                           |
+| Estilo do layout  | Cor de fundo (quando background não cobre tudo), borda/sombra das fotos da colagem, raio dos cantos      |
+| Undo/redo         | **Sim** (no MVP)                                                                                         |
+| Persistência      | **100% local** (IndexedDB) + **exportar/importar projeto** (`.zip`)                                      |
+| Exportação        | **PNGs por página + `.zip`** quando houver múltiplas páginas                                             |
+| Plataforma        | **Mobile-first + PWA** (instalável, offline)                                                             |
+| Idiomas           | **pt-BR + EN** (i18n; pt-BR padrão)                                                                      |
+| Analytics         | **Nenhum**                                                                                               |
+| Hospedagem        | **GitHub Pages** em domínio padrão (`usuario.github.io/post-maker`)                                      |
+| Monetização       | **Grátis total**                                                                                         |
 
 ### 3.2 Fora do escopo (MVP) — backlog futuro
 
@@ -171,15 +171,15 @@ offline. O app deve abrir e editar sem rede.
 
 ## 5. UX / Telas
 
-| Tela | Conteúdo |
-|------|----------|
-| **Home** | Logo, "Criar novo", lista de projetos salvos (thumb + data), seletor de idioma. |
-| **Nova: proporção** | 3 cards (4:5, 1:1, 9:16) com preview do enquadramento. |
-| **Nova: template** | Grade de templates (preview animado das páginas), filtrável por nº de páginas/fotos. |
-| **Seleção de fotos** | Botão de upload + grade de fotos selecionadas (reordenável). |
-| **Editor** | Canvas da página atual; barra de ferramentas (Colagem / Background / Estilo); tira de páginas na base; undo/redo; botão Exportar. |
-| **Manipulação de foto** | Handles de mover/rotacionar/redimensionar (gestos no mobile) + ajustes + filtros. |
-| **Exportar** | Escolha de páginas, formato, baixar/compartilhar, progresso. |
+| Tela                    | Conteúdo                                                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Home**                | Logo, "Criar novo", lista de projetos salvos (thumb + data), seletor de idioma.                                                   |
+| **Nova: proporção**     | 3 cards (4:5, 1:1, 9:16) com preview do enquadramento.                                                                            |
+| **Nova: template**      | Grade de templates (preview animado das páginas), filtrável por nº de páginas/fotos.                                              |
+| **Seleção de fotos**    | Botão de upload + grade de fotos selecionadas (reordenável).                                                                      |
+| **Editor**              | Canvas da página atual; barra de ferramentas (Colagem / Background / Estilo); tira de páginas na base; undo/redo; botão Exportar. |
+| **Manipulação de foto** | Handles de mover/rotacionar/redimensionar (gestos no mobile) + ajustes + filtros.                                                 |
+| **Exportar**            | Escolha de páginas, formato, baixar/compartilhar, progresso.                                                                      |
 
 Diretrizes visuais: tipografia limpa, espaço em branco, cantos arredondados,
 paleta neutra com 1 cor de acento. Acessível (contraste AA, alvos de toque
@@ -218,51 +218,61 @@ paleta neutra com 1 cor de acento. Acessível (contraste AA, alvos de toque
 ## 7. Modelo de dados (rascunho)
 
 ```ts
-type AspectRatio = "4:5" | "1:1" | "9:16";
+type AspectRatio = '4:5' | '1:1' | '9:16'
 
 interface Project {
-  id: string;
-  name: string;
-  createdAt: number;
-  updatedAt: number;
-  aspectRatio: AspectRatio;
-  templateId: string;            // template de origem (informativo)
-  pages: Page[];
-  assets: Record<string, AssetRef>; // imagens (Blob no IndexedDB)
+  id: string
+  name: string
+  createdAt: number
+  updatedAt: number
+  aspectRatio: AspectRatio
+  templateId: string // template de origem (informativo)
+  pages: Page[]
+  assets: Record<string, AssetRef> // imagens (Blob no IndexedDB)
 }
 
 interface Page {
-  id: string;
+  id: string
   background: {
-    assetId: string | null;
-    transform: Transform;        // pan/zoom do cover
-    adjustments: Adjustments;
-  };
-  bgColor: string;               // cor de fundo (quando a foto não cobre tudo)
-  collage: CollagePhoto[];       // fotos sobrepostas, em ordem de z-index
+    assetId: string | null
+    transform: Transform // pan/zoom do cover
+    adjustments: Adjustments
+  }
+  bgColor: string // cor de fundo (quando a foto não cobre tudo)
+  collage: CollagePhoto[] // fotos sobrepostas, em ordem de z-index
 }
 
 interface CollagePhoto {
-  id: string;
-  assetId: string | null;
-  transform: Transform;          // posição, escala e ROTAÇÃO (inclinação)
-  frame: { w: number; h: number; cornerRadius: number };
-  style: { borderWidth: number; borderColor: string; shadow: boolean };
-  adjustments: Adjustments;
+  id: string
+  assetId: string | null
+  transform: Transform // posição, escala e ROTAÇÃO (inclinação)
+  frame: { w: number; h: number; cornerRadius: number }
+  style: { borderWidth: number; borderColor: string; shadow: boolean }
+  adjustments: Adjustments
 }
 
-interface Transform { x: number; y: number; scale: number; rotation: number; }
-interface Adjustments { brightness: number; contrast: number; saturation: number; filter?: string; }
+interface Transform {
+  x: number
+  y: number
+  scale: number
+  rotation: number
+}
+interface Adjustments {
+  brightness: number
+  contrast: number
+  saturation: number
+  filter?: string
+}
 
 // Template = preset de carrossel (gera os valores iniciais de Page[])
 interface Template {
-  id: string;
-  pages: number;                 // 2..4
-  aspect: AspectRatio | "any";
+  id: string
+  pages: number // 2..4
+  aspect: AspectRatio | 'any'
   pageDefs: Array<{
-    collageCount: number;        // 2..3
-    collage: Array<{ x: number; y: number; scale: number; rotation: number; w: number; h: number }>;
-  }>;
+    collageCount: number // 2..3
+    collage: Array<{ x: number; y: number; scale: number; rotation: number; w: number; h: number }>
+  }>
 }
 ```
 
@@ -323,6 +333,7 @@ interface Template {
 - ✅ Lista nominal dos templates iniciais — ver [`TEMPLATES.md`](TEMPLATES.md).
 
 ### Ainda a definir
+
 - [ ] Conjunto exato de filtros pré-definidos.
 - [ ] Ajuste fino das coordenadas/ângulos de cada arranjo por proporção.
 - [ ] Detalhes de gesto/UX da rotação no mobile.
