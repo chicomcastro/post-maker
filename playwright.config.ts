@@ -14,6 +14,9 @@ export default defineConfig({
   use: {
     baseURL: BASE,
     trace: 'on-first-retry',
+    // Testes validam o app, não o service worker; bloquear evita que o SW
+    // (inclusive o modo autodestrutivo de resgate) recarregue a página no meio.
+    serviceWorkers: 'block',
   },
   projects: [
     {
