@@ -41,3 +41,32 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  e2e:
+    name: Testes e2e (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install (npm ci)
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npm run e2e:install
+
+      - name: Run e2e smoke tests
+        run: npm run e2e
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

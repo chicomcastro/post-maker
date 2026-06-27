@@ -20,3 +20,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0011](0011-exportacao-png-zip.md)           | Exportação PNG/ZIP e compartilhamento              | Aceito |
 | [0012](0012-ui-nativa.md)                    | UI no estilo de app nativo                         | Aceito |
 | [0013](0013-background-compartilhado.md)     | Background compartilhado pelo carrossel            | Aceito |
+| [0014](0014-e2e-resiliencia.md)              | Testes e2e, error boundary e migração de dados     | Aceito |
