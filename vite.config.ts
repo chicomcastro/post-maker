@@ -8,6 +8,9 @@ const BASE = '/post-maker/'
 
 export default defineConfig({
   base: BASE,
+  // Alvo conservador para suportar Safari/iOS mais antigos (evita tela branca
+  // por sintaxe moderna não suportada no motor do usuário).
+  build: { target: ['es2019', 'safari13', 'chrome80', 'firefox72', 'edge88'] },
   plugins: [
     react(),
     VitePWA({
