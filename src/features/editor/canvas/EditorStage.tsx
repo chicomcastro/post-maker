@@ -14,6 +14,8 @@ import { useAssetImage } from './useAssetImage'
 
 interface EditorStageProps {
   page: Page
+  background: Background
+  bgColor: string
   aspectRatio: AspectRatio
   width: number
   selectedPhotoId: string | null
@@ -23,6 +25,8 @@ interface EditorStageProps {
 
 export default function EditorStage({
   page,
+  background,
+  bgColor,
   aspectRatio,
   width,
   selectedPhotoId,
@@ -55,8 +59,8 @@ export default function EditorStage({
       }}
     >
       <Layer ref={layerRef}>
-        <Rect x={0} y={0} width={stage.width} height={stage.height} fill={page.bgColor} />
-        <BackgroundImage background={page.background} stage={stage} />
+        <Rect x={0} y={0} width={stage.width} height={stage.height} fill={bgColor} />
+        <BackgroundImage background={background} stage={stage} />
         {page.collage.map((photo) => (
           <CollageImage
             key={photo.id}

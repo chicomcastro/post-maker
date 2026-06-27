@@ -11,7 +11,13 @@ describe('PagePreview', () => {
     const urls = { bg: 'blob:bg', p1: 'blob:p1', p2: 'blob:p2', p3: 'blob:p3' }
 
     const { container } = render(
-      <PagePreview page={page} aspectRatio={project.aspectRatio} urls={urls} />,
+      <PagePreview
+        page={page}
+        background={project.background}
+        bgColor={project.bgColor}
+        aspectRatio={project.aspectRatio}
+        urls={urls}
+      />,
     )
 
     expect(container.querySelector('.page-preview__bg')).toBeTruthy()
@@ -19,8 +25,16 @@ describe('PagePreview', () => {
   })
 
   it('marca fotos sem url como vazias', () => {
-    const page = createProjectFromTemplate('post-solo').pages[0]
-    const { container } = render(<PagePreview page={page} aspectRatio="1:1" urls={{}} />)
+    const project = createProjectFromTemplate('post-solo')
+    const { container } = render(
+      <PagePreview
+        page={project.pages[0]}
+        background={project.background}
+        bgColor={project.bgColor}
+        aspectRatio="1:1"
+        urls={{}}
+      />,
+    )
     expect(container.querySelector('.page-preview__photo--empty')).toBeTruthy()
   })
 })

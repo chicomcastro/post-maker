@@ -39,10 +39,10 @@ describe('catálogo de templates', () => {
   })
 
   it('calcula a capacidade de fotos (background + colagem)', () => {
-    // post-solo: 1 página, A1 (1 colagem) => 1 bg + 1 = 2
+    // post-solo: A1 (1 colagem) => 1 bg compartilhado + 1 = 2
     expect(templatePhotoCapacity(getTemplate('post-solo'))).toBe(2)
-    // carousel3-scatter: 3 páginas A5 (3 colagens) => 3*(1+3) = 12
-    expect(templatePhotoCapacity(getTemplate('carousel3-scatter'))).toBe(12)
+    // carousel3-scatter: 3 páginas A5 (3 colagens) => 1 bg + 9 = 10
+    expect(templatePhotoCapacity(getTemplate('carousel3-scatter'))).toBe(10)
   })
 
   it('lança erro para template/arranjo desconhecido', () => {

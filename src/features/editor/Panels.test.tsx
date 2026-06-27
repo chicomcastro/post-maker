@@ -20,12 +20,12 @@ beforeEach(async () => {
 
 describe('Toolbar', () => {
   it('habilita desfazer após uma mudança e desfaz', async () => {
-    const project = setup()
+    setup()
     render(<Toolbar />)
     const undo = screen.getByRole('button', { name: /desfazer/i })
     expect(undo).toBeDisabled()
 
-    useEditorStore.getState().setPageBgColor(project.pages[0].id, '#abcdef')
+    useEditorStore.getState().setBgColor('#abcdef')
     await waitFor(() => expect(undo).toBeEnabled())
     await userEvent.click(undo)
     await waitFor(() => expect(screen.getByRole('button', { name: /refazer/i })).toBeEnabled())
@@ -58,8 +58,8 @@ describe('Filmstrip', () => {
 })
 
 describe('SidePanel — fundo', () => {
-  it('ajusta cor, zoom/pan e aplica filtro no background', () => {
-    const project = setup()
+  it('ajusta cor, zoom/pan e aplica filtro no background compartilhado', () => {
+    setup()
     render(<SidePanel project={useEditorStore.getState().project!} />)
     expect(screen.getByRole('heading', { name: /fundo/i })).toBeInTheDocument()
 
@@ -67,9 +67,9 @@ describe('SidePanel — fundo', () => {
     sliders.forEach((s, i) => fireEvent.change(s, { target: { value: i % 2 ? '1.2' : '2' } }))
 
     fireEvent.click(screen.getByRole('button', { name: /^p&b$/i }))
-    const bg = useEditorStore.getState().project!.pages[0].background
+    const bg = useEditorStore.getState().project!.background
     expect(bg.adjustments.saturation).toBe(0)
-    expect(project.pages[0].background.transform.scale).toBeGreaterThanOrEqual(1)
+    expect(bg.transform.scale).toBeGreaterThanOrEqual(1)
   })
 })
 

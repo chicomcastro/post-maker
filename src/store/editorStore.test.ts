@@ -59,15 +59,14 @@ describe('editorStore — edição de fotos e fundo', () => {
     expect(useEditorStore.getState().project!.pages[0].collage[0].adjustments.saturation).toBe(0)
   })
 
-  it('muda a cor de fundo da página e o zoom do background', () => {
-    const project = load('post-solo')
-    const page = project.pages[0]
-    useEditorStore.getState().setPageBgColor(page.id, '#ff0000')
-    useEditorStore.getState().updateBackground(page.id, (b) => ({
+  it('muda a cor de fundo e o zoom do background (compartilhados)', () => {
+    load('post-solo')
+    useEditorStore.getState().setBgColor('#ff0000')
+    useEditorStore.getState().updateBackground((b) => ({
       ...b,
       transform: { ...b.transform, scale: 2 },
     }))
-    const updated = useEditorStore.getState().project!.pages[0]
+    const updated = useEditorStore.getState().project!
     expect(updated.bgColor).toBe('#ff0000')
     expect(updated.background.transform.scale).toBe(2)
   })

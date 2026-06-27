@@ -13,7 +13,7 @@ import {
 } from '../types/project'
 import { createId } from './id'
 
-function makeBackground(): Background {
+export function makeBackground(): Background {
   return {
     assetId: null,
     transform: { x: 0.5, y: 0.5, scale: 1, rotation: 0 },
@@ -37,8 +37,6 @@ export function createPageFromArrangement(arrangementId: string): Page {
   const arrangement = getArrangement(arrangementId)
   return {
     id: createId(),
-    background: makeBackground(),
-    bgColor: DEFAULT_BG_COLOR,
     collage: arrangement.slots.map(makeCollagePhoto),
   }
 }
@@ -63,6 +61,8 @@ export function createProjectFromTemplate(
     updatedAt: now,
     aspectRatio: options.aspectRatio ?? template.preferredAspect,
     templateId: template.id,
+    background: makeBackground(),
+    bgColor: DEFAULT_BG_COLOR,
     pages: template.pages.map(createPageFromArrangement),
   }
 }
@@ -72,25 +72,25 @@ function defaultName(template: Template): string {
 }
 
 /**
- * Distribui uma lista de fotos (assetIds) pelas páginas do projeto, em ordem:
- * a primeira foto de cada página vira o background, as seguintes preenchem os
- * frames de colagem. Retorna um novo projeto e os assetIds que sobraram.
+ * Distribui uma lista de fotos (assetIds) pelo projeto, em ordem: a PRIMEIRA
+ * foto vira o background compartilhado do carrossel; as seguintes preenchem os
+ * frames de colagem, página a página. Retorna um novo projeto e o que sobrou.
  */
 export function distributePhotos(
   project: Project,
   assetIds: string[],
 ): { project: Project; leftover: string[] } {
   const queue = [...assetIds]
+  const background: Background = {
+    ...project.background,
+    assetId: queue.length ? (queue.shift() ?? null) : project.background.assetId,
+  }
   const pages = project.pages.map((page) => {
-    const background: Background = {
-      ...page.background,
-      assetId: queue.length ? (queue.shift() ?? null) : page.background.assetId,
-    }
     const collage = page.collage.map((photo) => ({
       ...photo,
       assetId: queue.length ? (queue.shift() ?? null) : photo.assetId,
     }))
-    return { ...page, background, collage }
+    return { ...page, collage }
   })
-  return { project: { ...project, pages }, leftover: queue }
+  return { project: { ...project, background, pages }, leftover: queue }
 }

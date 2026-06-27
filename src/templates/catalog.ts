@@ -95,12 +95,10 @@ export function getTemplate(id: string): Template {
   return t
 }
 
-/** Total de fotos (background + colagem) que um template comporta. */
+/** Total de fotos que um template comporta: 1 background compartilhado + colagens. */
 export function templatePhotoCapacity(template: Template): number {
-  return template.pages.reduce((sum, arrId) => {
-    const count = ARRANGEMENT_COUNTS[arrId] ?? 0
-    return sum + 1 + count // 1 background por página + fotos de colagem
-  }, 0)
+  const collage = template.pages.reduce((sum, arrId) => sum + (ARRANGEMENT_COUNTS[arrId] ?? 0), 0)
+  return 1 + collage
 }
 
 // Pequeno mapa de contagem para evitar import circular pesado; validado em teste.
