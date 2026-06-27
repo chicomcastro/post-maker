@@ -15,6 +15,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // RESGATE: service worker autodestrutivo. Usuários presos num SW antigo
+      // (que servia um index em cache apontando para chunks já removidos -> tela
+      // branca) recebem este SW no próximo update-check; ele desregistra a si
+      // mesmo, limpa os caches e recarrega na versão de rede. PWA/offline fica
+      // temporariamente desativado até reabilitarmos (com navegação NetworkFirst).
+      selfDestroying: true,
       includeAssets: ['favicon.svg'],
       workbox: {
         // heic2any (~1.3MB) é carregado sob demanda; não vale precachear no SW.
