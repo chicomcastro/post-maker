@@ -740,6 +740,18 @@ input[type='range']::-moz-range-thumb {
   margin: 10px 0 0;
 }
 
+.error-screen {
+  text-align: center;
+  padding: 48px 8px;
+}
+.error-screen h1 {
+  font-size: 1.4rem;
+  margin: 0 0 0.5rem;
+}
+.error-screen p {
+  margin: 0 0 1.5rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.001ms !important;

@@ -4,11 +4,14 @@ import { HashRouter } from 'react-router-dom'
 import './i18n'
 import './index.css'
 import { App } from './App'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <App />
-    </HashRouter>
+    <ErrorBoundary>
+      <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <App />
+      </HashRouter>
+    </ErrorBoundary>
   </StrictMode>,
 )

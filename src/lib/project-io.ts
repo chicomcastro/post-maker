@@ -1,5 +1,6 @@
 import JSZip from 'jszip'
 import type { Project } from '../types/project'
+import { normalizeProject } from './migrations'
 
 const MANIFEST = 'project.json'
 const ASSET_DIR = 'assets'
@@ -101,5 +102,5 @@ export async function importProjectZip(input: Blob | ArrayBuffer): Promise<Impor
     assets.set(assetId, new Blob([buffer], { type: mimeForPath(path) }))
   }
 
-  return { project: manifest.project, assets }
+  return { project: normalizeProject(manifest.project), assets }
 }

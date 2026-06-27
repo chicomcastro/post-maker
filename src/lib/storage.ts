@@ -1,5 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 import type { Project } from '../types/project'
+import { normalizeProject } from './migrations'
 
 interface PostMakerDB extends DBSchema {
   projects: {
@@ -43,14 +44,15 @@ export async function saveProject(project: Project): Promise<void> {
 
 export async function loadProject(id: string): Promise<Project | undefined> {
   const db = await getDB()
-  return db.get('projects', id)
+  const raw = await db.get('projects', id)
+  return raw ? normalizeProject(raw) : undefined
 }
 
 /** Lista projetos do mais recente para o mais antigo. */
 export async function listProjects(): Promise<Project[]> {
   const db = await getDB()
   const all = await db.getAllFromIndex('projects', 'updatedAt')
-  return all.reverse()
+  return all.reverse().map(normalizeProject)
 }
 
 export async function deleteProject(id: string): Promise<void> {
