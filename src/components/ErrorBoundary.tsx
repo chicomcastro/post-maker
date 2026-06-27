@@ -22,7 +22,20 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('Erro de render capturado:', error)
   }
 
-  handleReset = () => {
+  handleReset = async () => {
+    // Limpa um possível service worker / cache antigo antes de recarregar.
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations()
+        await Promise.all(regs.map((r) => r.unregister()))
+      }
+      if (typeof caches !== 'undefined') {
+        const keys = await caches.keys()
+        await Promise.all(keys.map((k) => caches.delete(k)))
+      }
+    } catch {
+      // ignora: o reload abaixo ainda ajuda
+    }
     window.location.hash = '#/'
     window.location.reload()
   }

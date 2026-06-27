@@ -10,6 +10,59 @@
       content="Crie carrosséis de fotos lindos para o Instagram em minutos, direto do navegador."
     />
     <title>Post Maker</title>
+    <script>
+      // Auto-recuperação: se um recurso essencial (JS/CSS) falhar ao carregar
+      // — típico de service worker com cache antigo apontando para um chunk que
+      // não existe mais após um deploy — limpa SW + caches e recarrega 1x.
+      // Inline e sem hash, então roda mesmo quando o bundle principal falha.
+      window.addEventListener(
+        'error',
+        function (e) {
+          var t = e && e.target
+          if (!t || (t.tagName !== 'SCRIPT' && t.tagName !== 'LINK')) return
+          // Só age em chunks versionados do build (caso de SW antigo apontando
+          // para um asset que não existe mais). Ignora erros benignos.
+          var url = t.src || t.href || ''
+          if (url.indexOf('/assets/') === -1) return
+          if (sessionStorage.getItem('pm-recovered')) return
+          sessionStorage.setItem('pm-recovered', '1')
+          var done = function () {
+            location.reload()
+          }
+          var p = []
+          if ('serviceWorker' in navigator) {
+            p.push(
+              navigator.serviceWorker
+                .getRegistrations()
+                .then(function (rs) {
+                  return Promise.all(
+                    rs.map(function (r) {
+                      return r.unregister()
+                    }),
+                  )
+                })
+                .catch(function () {}),
+            )
+          }
+          if (window.caches) {
+            p.push(
+              caches
+                .keys()
+                .then(function (ks) {
+                  return Promise.all(
+                    ks.map(function (k) {
+                      return caches.delete(k)
+                    }),
+                  )
+                })
+                .catch(function () {}),
+            )
+          }
+          Promise.all(p).then(done, done)
+        },
+        true,
+      )
+    </script>
   </head>
   <body>
     <div id="root"></div>
