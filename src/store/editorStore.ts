@@ -22,13 +22,14 @@ export interface EditorState {
   removePage: (pageId: string) => void
   reorderPages: (from: number, to: number) => void
 
-  updateBackground: (pageId: string, updater: (bg: Background) => Background) => void
+  /** Background é compartilhado pelo carrossel (nível do projeto). */
+  updateBackground: (updater: (bg: Background) => Background) => void
+  setBgColor: (color: string) => void
   updateCollagePhoto: (
     pageId: string,
     photoId: string,
     updater: (photo: CollagePhoto) => CollagePhoto,
   ) => void
-  setPageBgColor: (pageId: string, color: string) => void
   bringPhotoToFront: (pageId: string, photoId: string) => void
   sendPhotoToBack: (pageId: string, photoId: string) => void
 }
@@ -109,10 +110,17 @@ export const useEditorStore = create<EditorState>()(
           return { project: withTimestamp({ ...s.project, pages }) }
         }),
 
-      updateBackground: (pageId, updater) =>
+      updateBackground: (updater) =>
         set((s) =>
-          mapPage(s, pageId, (page) => ({ ...page, background: updater(page.background) })),
+          s.project
+            ? {
+                project: withTimestamp({ ...s.project, background: updater(s.project.background) }),
+              }
+            : s,
         ),
+
+      setBgColor: (bgColor) =>
+        set((s) => (s.project ? { project: withTimestamp({ ...s.project, bgColor }) } : s)),
 
       updateCollagePhoto: (pageId, photoId, updater) =>
         set((s) =>
@@ -121,9 +129,6 @@ export const useEditorStore = create<EditorState>()(
             collage: page.collage.map((photo) => (photo.id === photoId ? updater(photo) : photo)),
           })),
         ),
-
-      setPageBgColor: (pageId, bgColor) =>
-        set((s) => mapPage(s, pageId, (page) => ({ ...page, bgColor }))),
 
       bringPhotoToFront: (pageId, photoId) =>
         set((s) => mapPage(s, pageId, (page) => reorderPhoto(page, photoId, 'front'))),

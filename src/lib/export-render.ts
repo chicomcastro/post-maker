@@ -30,8 +30,8 @@ function loadImage(blob: Blob): Promise<HTMLImageElement> {
 
 async function imagesFor(project: Project): Promise<Map<string, HTMLImageElement>> {
   const ids = new Set<string>()
+  if (project.background.assetId) ids.add(project.background.assetId)
   for (const page of project.pages) {
-    if (page.background.assetId) ids.add(page.background.assetId)
     for (const photo of page.collage) if (photo.assetId) ids.add(photo.assetId)
   }
   const map = new Map<string, HTMLImageElement>()
@@ -77,21 +77,22 @@ export function renderPage(
   canvas.height = height
   const ctx = canvas.getContext('2d')!
 
-  // Fundo
-  ctx.fillStyle = page.bgColor
+  // Fundo (compartilhado pelo projeto)
+  const background = project.background
+  ctx.fillStyle = project.bgColor
   ctx.fillRect(0, 0, width, height)
 
   // Background (cover + zoom/pan)
-  const bgImg = page.background.assetId ? images.get(page.background.assetId) : undefined
+  const bgImg = background.assetId ? images.get(background.assetId) : undefined
   if (bgImg) {
     const crop = backgroundCropRect(
       { width: bgImg.naturalWidth, height: bgImg.naturalHeight },
       stage,
-      page.background.transform.scale,
-      page.background.transform.x - 0.5,
-      page.background.transform.y - 0.5,
+      background.transform.scale,
+      background.transform.x - 0.5,
+      background.transform.y - 0.5,
     )
-    withFilter(ctx, page.background.adjustments, () => {
+    withFilter(ctx, background.adjustments, () => {
       ctx.drawImage(bgImg, crop.x, crop.y, crop.width, crop.height, 0, 0, width, height)
     })
   }

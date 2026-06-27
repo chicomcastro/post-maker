@@ -10,8 +10,8 @@ describe('createProjectFromTemplate', () => {
     expect(project.createdAt).toBe(1000)
     for (const page of project.pages) {
       expect(page.collage).toHaveLength(getArrangement('A5').count)
-      expect(page.background.assetId).toBeNull()
     }
+    expect(project.background.assetId).toBeNull()
   })
 
   it('respeita name e aspectRatio sobrescritos', () => {
@@ -31,18 +31,34 @@ describe('createProjectFromTemplate', () => {
 })
 
 describe('distributePhotos', () => {
-  it('preenche background e colagem na ordem, devolvendo o excedente', () => {
+  it('usa a 1ª foto como background compartilhado e o resto na colagem', () => {
     const project = createProjectFromTemplate('post-diagonal') // 1 página, A3 (2 colagens) => cap 3
     const { project: filled, leftover } = distributePhotos(project, ['a', 'b', 'c', 'd', 'e'])
-    expect(filled.pages[0].background.assetId).toBe('a')
+    expect(filled.background.assetId).toBe('a')
     expect(filled.pages[0].collage.map((c) => c.assetId)).toEqual(['b', 'c'])
     expect(leftover).toEqual(['d', 'e'])
+  })
+
+  it('compartilha o mesmo background entre todas as páginas do carrossel', () => {
+    const project = createProjectFromTemplate('carousel3-diagonal') // 3 páginas
+    const { project: filled } = distributePhotos(project, ['bg', 'a', 'b', 'c', 'd', 'e', 'f'])
+    expect(filled.background.assetId).toBe('bg')
+    // todas as páginas referenciam o mesmo background (nível do projeto)
+    expect(filled.pages).toHaveLength(3)
+    expect(filled.pages.flatMap((p) => p.collage.map((c) => c.assetId))).toEqual([
+      'a',
+      'b',
+      'c',
+      'd',
+      'e',
+      'f',
+    ])
   })
 
   it('deixa frames vazios quando faltam fotos', () => {
     const project = createProjectFromTemplate('post-trio-scatter') // A5 => cap 4
     const { project: filled, leftover } = distributePhotos(project, ['a', 'b'])
-    expect(filled.pages[0].background.assetId).toBe('a')
+    expect(filled.background.assetId).toBe('a')
     expect(filled.pages[0].collage[0].assetId).toBe('b')
     expect(filled.pages[0].collage[1].assetId).toBeNull()
     expect(leftover).toEqual([])

@@ -1,28 +1,37 @@
 import type { CSSProperties } from 'react'
-import type { AspectRatio, Page } from '../types/project'
+import type { AspectRatio, Background, Page } from '../types/project'
 
 interface PagePreviewProps {
   page: Page
+  background: Background
+  bgColor: string
   aspectRatio: AspectRatio
   urls: Record<string, string>
   className?: string
 }
 
-/** Render read-only de uma página (background + colagem) usando coords normalizadas. */
-export function PagePreview({ page, aspectRatio, urls, className }: PagePreviewProps) {
-  const bgUrl = page.background.assetId ? urls[page.background.assetId] : undefined
+/** Render read-only de uma página (background compartilhado + colagem). */
+export function PagePreview({
+  page,
+  background,
+  bgColor,
+  aspectRatio,
+  urls,
+  className,
+}: PagePreviewProps) {
+  const bgUrl = background.assetId ? urls[background.assetId] : undefined
 
   return (
     <div
       className={'page-preview' + (className ? ' ' + className : '')}
-      style={{ aspectRatio: aspectRatio.replace(':', ' / '), backgroundColor: page.bgColor }}
+      style={{ aspectRatio: aspectRatio.replace(':', ' / '), backgroundColor: bgColor }}
     >
       {bgUrl && (
         <div
           className="page-preview__bg"
           style={{
             backgroundImage: `url(${bgUrl})`,
-            ...adjustmentFilter(page.background.adjustments),
+            ...adjustmentFilter(background.adjustments),
           }}
         />
       )}

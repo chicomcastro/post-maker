@@ -79,8 +79,8 @@ export async function pruneOrphanAssets(): Promise<number> {
   const projects = await db.getAll('projects')
   const referenced = new Set<string>()
   for (const project of projects) {
+    if (project.background.assetId) referenced.add(project.background.assetId)
     for (const page of project.pages) {
-      if (page.background.assetId) referenced.add(page.background.assetId)
       for (const photo of page.collage) {
         if (photo.assetId) referenced.add(photo.assetId)
       }

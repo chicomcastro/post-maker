@@ -120,6 +120,8 @@ export function EditorPage() {
           {page && (
             <EditorStage
               page={page}
+              background={project.background}
+              bgColor={project.bgColor}
               aspectRatio={project.aspectRatio}
               width={stageWidth}
               selectedPhotoId={selectedPhotoId}

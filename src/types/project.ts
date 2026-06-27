@@ -67,7 +67,7 @@ export interface CollagePhoto {
   adjustments: Adjustments
 }
 
-/** Foto de fundo da página (cobre tudo, modo "cover"). */
+/** Foto de fundo (cobre tudo, modo "cover"). Compartilhada pelo carrossel. */
 export interface Background {
   assetId: string | null
   transform: Transform
@@ -77,9 +77,6 @@ export interface Background {
 /** Uma página do projeto (um slide do carrossel, ou o post inteiro). */
 export interface Page {
   id: string
-  background: Background
-  /** Cor de fundo visível quando o background não cobre a página. */
-  bgColor: string
   /** Fotos de colagem, em ordem de z-index (última = mais à frente). */
   collage: CollagePhoto[]
 }
@@ -93,6 +90,10 @@ export interface Project {
   aspectRatio: AspectRatio
   /** Template de origem (informativo). */
   templateId: string
+  /** Background compartilhado por todas as páginas do carrossel. */
+  background: Background
+  /** Cor de fundo visível quando o background não cobre a página. */
+  bgColor: string
   pages: Page[]
 }
 

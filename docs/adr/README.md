@@ -19,3 +19,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0010](0010-editor-konva.md)                 | Editor interativo com Konva                        | Aceito |
 | [0011](0011-exportacao-png-zip.md)           | Exportação PNG/ZIP e compartilhamento              | Aceito |
 | [0012](0012-ui-nativa.md)                    | UI no estilo de app nativo                         | Aceito |
+| [0013](0013-background-compartilhado.md)     | Background compartilhado pelo carrossel            | Aceito |

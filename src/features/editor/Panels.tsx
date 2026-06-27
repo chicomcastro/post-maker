@@ -62,7 +62,13 @@ export function Filmstrip({ project }: { project: Project }) {
           onClick={() => setCurrentPage(i)}
           aria-label={t('editor.page', { n: i + 1 })}
         >
-          <PagePreview page={page} aspectRatio={project.aspectRatio} urls={urls} />
+          <PagePreview
+            page={page}
+            background={project.background}
+            bgColor={project.bgColor}
+            aspectRatio={project.aspectRatio}
+            urls={urls}
+          />
         </button>
       ))}
       {canAdd && (
@@ -181,12 +187,13 @@ export function SidePanel({ project }: { project: Project }) {
   const selectedPhotoId = useEditorStore((s) => s.selectedPhotoId)
   const updateCollagePhoto = useEditorStore((s) => s.updateCollagePhoto)
   const updateBackground = useEditorStore((s) => s.updateBackground)
-  const setPageBgColor = useEditorStore((s) => s.setPageBgColor)
+  const setBgColor = useEditorStore((s) => s.setBgColor)
   const bringToFront = useEditorStore((s) => s.bringPhotoToFront)
   const sendToBack = useEditorStore((s) => s.sendPhotoToBack)
   if (!page) return null
 
   const photo = page.collage.find((p) => p.id === selectedPhotoId)
+  const background = project.background
 
   return (
     <div className="sheet">
@@ -208,57 +215,54 @@ export function SidePanel({ project }: { project: Project }) {
                 <button
                   key={c}
                   type="button"
-                  className={'swatch' + (page.bgColor === c ? ' swatch--active' : '')}
+                  className={'swatch' + (project.bgColor === c ? ' swatch--active' : '')}
                   style={{ background: c }}
                   aria-label={c}
-                  onClick={() => setPageBgColor(page.id, c)}
+                  onClick={() => setBgColor(c)}
                 />
               ))}
               <input
                 type="color"
                 className="swatch-input"
                 aria-label={t('editor.bgColor')}
-                value={page.bgColor}
-                onChange={(e) => setPageBgColor(page.id, e.target.value)}
+                value={project.bgColor}
+                onChange={(e) => setBgColor(e.target.value)}
               />
             </div>
             <Slider
               label={t('editor.zoom')}
-              value={page.background.transform.scale}
+              value={background.transform.scale}
               min={1}
               max={3}
               step={0.05}
               onChange={(v) =>
-                updateBackground(page.id, (b) => ({
-                  ...b,
-                  transform: { ...b.transform, scale: v },
-                }))
+                updateBackground((b) => ({ ...b, transform: { ...b.transform, scale: v } }))
               }
             />
             <Slider
               label={t('editor.panX')}
-              value={page.background.transform.x}
+              value={background.transform.x}
               min={0}
               max={1}
               step={0.02}
               onChange={(v) =>
-                updateBackground(page.id, (b) => ({ ...b, transform: { ...b.transform, x: v } }))
+                updateBackground((b) => ({ ...b, transform: { ...b.transform, x: v } }))
               }
             />
             <Slider
               label={t('editor.panY')}
-              value={page.background.transform.y}
+              value={background.transform.y}
               min={0}
               max={1}
               step={0.02}
               onChange={(v) =>
-                updateBackground(page.id, (b) => ({ ...b, transform: { ...b.transform, y: v } }))
+                updateBackground((b) => ({ ...b, transform: { ...b.transform, y: v } }))
               }
             />
           </div>
           <AdjustControls
-            adjustments={page.background.adjustments}
-            onChange={(adjustments) => updateBackground(page.id, (b) => ({ ...b, adjustments }))}
+            adjustments={background.adjustments}
+            onChange={(adjustments) => updateBackground((b) => ({ ...b, adjustments }))}
           />
         </>
       )}
