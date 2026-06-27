@@ -11,24 +11,11 @@
     />
     <title>Post Maker</title>
     <script>
-      // Auto-recuperação: se um recurso essencial (JS/CSS) falhar ao carregar
-      // — típico de service worker com cache antigo apontando para um chunk que
-      // não existe mais após um deploy — limpa SW + caches e recarrega 1x.
-      // Inline e sem hash, então roda mesmo quando o bundle principal falha.
-      window.addEventListener(
-        'error',
-        function (e) {
-          var t = e && e.target
-          if (!t || (t.tagName !== 'SCRIPT' && t.tagName !== 'LINK')) return
-          // Só age em chunks versionados do build (caso de SW antigo apontando
-          // para um asset que não existe mais). Ignora erros benignos.
-          var url = t.src || t.href || ''
-          if (url.indexOf('/assets/') === -1) return
-          if (sessionStorage.getItem('pm-recovered')) return
-          sessionStorage.setItem('pm-recovered', '1')
-          var done = function () {
-            location.reload()
-          }
+      // Rede de segurança contra tela branca. Inline e sem hash: roda mesmo se o
+      // bundle principal falhar ao carregar/avaliar.
+      ;(function () {
+        var errors = []
+        function cleanupAndReload() {
           var p = []
           if ('serviceWorker' in navigator) {
             p.push(
@@ -58,10 +45,57 @@
                 .catch(function () {}),
             )
           }
-          Promise.all(p).then(done, done)
-        },
-        true,
-      )
+          var reload = function () {
+            location.reload()
+          }
+          Promise.all(p).then(reload, reload)
+        }
+        window.__pmCleanup = cleanupAndReload
+
+        window.addEventListener(
+          'error',
+          function (e) {
+            var t = e && e.target
+            if (t && (t.tagName === 'SCRIPT' || t.tagName === 'LINK')) {
+              var url = t.src || t.href || ''
+              errors.push('Falha ao carregar: ' + url)
+              // Chunk versionado ausente (SW/cache antigo após deploy): recupera 1x.
+              if (url.indexOf('/assets/') !== -1 && !sessionStorage.getItem('pm-recovered')) {
+                sessionStorage.setItem('pm-recovered', '1')
+                cleanupAndReload()
+              }
+            } else if (e && e.message) {
+              errors.push(
+                'Erro: ' + e.message + (e.filename ? ' @ ' + e.filename + ':' + e.lineno : ''),
+              )
+            }
+          },
+          true,
+        )
+        window.addEventListener('unhandledrejection', function (e) {
+          var r = e && e.reason
+          errors.push('Falha: ' + ((r && (r.message || r.stack)) || r || 'desconhecida'))
+        })
+
+        // Se o app não montar em alguns segundos, mostra o erro (em vez de branco).
+        window.addEventListener('load', function () {
+          setTimeout(function () {
+            var root = document.getElementById('root')
+            if (!root || root.childElementCount > 0) return
+            var detail = (errors.join('\n') || 'Nenhum erro capturado (possível cache antigo).')
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+            root.innerHTML =
+              '<div style="font-family:system-ui,-apple-system,sans-serif;padding:28px 20px;max-width:520px;margin:0 auto;text-align:center">' +
+              '<h1 style="font-size:1.3rem;margin:0 0 8px">Não foi possível abrir o app</h1>' +
+              '<p style="color:#6b7280;margin:0 0 14px">Toque para limpar o cache e recarregar. Se persistir, mande o detalhe abaixo.</p>' +
+              '<button onclick="window.__pmCleanup()" style="padding:13px 22px;border:none;border-radius:999px;background:#f97316;color:#fff;font-weight:600;font-size:1rem">Limpar cache e recarregar</button>' +
+              '<pre style="white-space:pre-wrap;text-align:left;background:#f4f4f5;color:#111;padding:12px;border-radius:10px;font-size:12px;margin-top:18px;overflow:auto">' +
+              detail +
+              '</pre></div>'
+          }, 4000)
+        })
+      })()
     </script>
   </head>
   <body>
