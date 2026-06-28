@@ -23,6 +23,21 @@ test('home carrega sem erros', async ({ page }) => {
   expect(errors).toEqual([])
 })
 
+// Regressão: em telas largas (iPad/desktop, >=480px) o .app-shell colapsava
+// para largura 0 (tela branca). Garante que a moldura tem largura e o conteúdo
+// aparece em viewport de tablet.
+test.describe('layout em tela larga (tablet)', () => {
+  test.use({ viewport: { width: 834, height: 1180 } })
+  test('renderiza a moldura e o conteúdo no iPad', async ({ page }) => {
+    await page.goto(APP)
+    await expect(page.getByRole('button', { name: /criar novo/i })).toBeVisible()
+    const box = await page.locator('.app-shell').boundingBox()
+    expect(box).not.toBeNull()
+    expect(box!.width).toBeGreaterThan(300)
+    expect(box!.height).toBeGreaterThan(300)
+  })
+})
+
 test('alterna idioma', async ({ page }) => {
   await page.goto(APP)
   await page.getByRole('button', { name: /idioma/i }).click()
@@ -58,7 +73,10 @@ test('fluxo completo: criar carrossel → editor → persiste → exporta', asyn
 
   // Persistência: volta à home e o projeto aparece salvo.
   await page.getByRole('button', { name: /voltar para o início/i }).click()
-  await expect(page.getByText(/novo carrossel/i)).toBeVisible()
+  // Espera a Home montar (fim da transição) antes de checar a lista.
+  await expect(page.getByRole('button', { name: /criar novo/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /seus projetos/i })).toBeVisible()
+  await expect(page.locator('.project-card__name')).toContainText(/novo carrossel/i)
 
   expect(errors).toEqual([])
 })
