@@ -15,6 +15,13 @@ export function Home() {
 
   useEffect(() => {
     listProjects().then(setProjects)
+    // Pré-carrega o chunk do editor (Konva) em segundo plano, para abrir um
+    // projeto sem esperar o download/parse na hora do clique.
+    const prefetch = () => void import('../features/editor/canvas/EditorStage')
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number })
+      .requestIdleCallback
+    if (ric) ric(prefetch)
+    else setTimeout(prefetch, 400)
   }, [])
 
   async function remove(id: string) {

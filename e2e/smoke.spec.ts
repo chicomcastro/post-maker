@@ -83,13 +83,13 @@ test('fluxo completo: criar carrossel → editor → persiste → exporta', asyn
   await expect(page.getByRole('button', { name: /página 3/i })).toBeVisible()
   await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
 
-  // Exporta (carrossel => .zip via download). Exportar é a ação principal:
-  // abre o seletor e escolhemos "gerar imagens".
+  // Exporta como imagens diretas (sem zip). Exportar é a ação principal:
+  // abre o seletor e escolhemos "gerar imagens" → baixa os PNGs.
   await page.getByRole('button', { name: /^exportar$/i }).click()
   const downloadPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: /gerar imagens/i }).click()
   const download = await downloadPromise
-  expect(download.suggestedFilename()).toMatch(/\.zip$/)
+  expect(download.suggestedFilename()).toMatch(/\.png$/)
 
   // Persistência: volta à home e o projeto aparece salvo.
   await page.getByRole('button', { name: /voltar para o início/i }).click()
