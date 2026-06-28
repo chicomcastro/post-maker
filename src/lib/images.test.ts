@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, vi } from 'vitest'
-import { isHeic, isImageFile, fileToDisplayBlob } from './images'
+import { isHeic, isImageFile, fileToDisplayBlob, downscaleImage } from './images'
 
 vi.mock('heic2any', () => ({
   default: vi.fn(async () => new Blob(['JPEG'], { type: 'image/jpeg' })),
@@ -35,5 +35,12 @@ describe('fileToDisplayBlob', () => {
     const out = await fileToDisplayBlob(file('a.heic', 'image/heic'))
     expect(out.type).toBe('image/jpeg')
     expect(await out.text()).toBe('JPEG')
+  })
+})
+
+describe('downscaleImage', () => {
+  it('devolve o blob original quando não há canvas (graceful fallback)', async () => {
+    const blob = new Blob(['x'], { type: 'image/jpeg' })
+    expect(await downscaleImage(blob, 2048)).toBe(blob)
   })
 })

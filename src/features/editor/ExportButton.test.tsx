@@ -5,23 +5,20 @@ import i18n from '../../i18n'
 import { ExportButton } from './ExportButton'
 import { createProjectFromTemplate } from '../../lib/project-factory'
 
-const { renderProjectToPngs, shareOrDownload, pngsToZip } = vi.hoisted(() => ({
+const { renderProjectToPngs, shareOrDownload } = vi.hoisted(() => ({
   renderProjectToPngs: vi.fn<(...a: unknown[]) => Promise<Blob[]>>(),
   shareOrDownload: vi.fn<(...a: unknown[]) => Promise<'share' | 'download'>>(),
-  pngsToZip: vi.fn<(...a: unknown[]) => Promise<Blob>>(),
 }))
 
 vi.mock('../../lib/export-render', () => ({ renderProjectToPngs }))
 vi.mock('../../lib/export', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../lib/export')>()),
   shareOrDownload,
-  pngsToZip,
 }))
 
 beforeEach(async () => {
   vi.clearAllMocks()
   shareOrDownload.mockResolvedValue('download')
-  pngsToZip.mockResolvedValue(new Blob(['zip'], { type: 'application/zip' }))
   await i18n.changeLanguage('pt')
 })
 
@@ -47,10 +44,9 @@ describe('ExportButton', () => {
     const files = filesFromCall()
     expect(files).toHaveLength(1)
     expect(files[0].name).toBe('praia.png')
-    expect(pngsToZip).not.toHaveBeenCalled()
   })
 
-  it('exporta um carrossel como ZIP', async () => {
+  it('exporta um carrossel como PNGs individuais (sem zip)', async () => {
     renderProjectToPngs.mockResolvedValueOnce([
       new Blob(['1'], { type: 'image/png' }),
       new Blob(['2'], { type: 'image/png' }),
@@ -60,8 +56,9 @@ describe('ExportButton', () => {
     render(<ExportButton project={project} />)
     await openAndChooseImages()
 
-    await waitFor(() => expect(pngsToZip).toHaveBeenCalledOnce())
+    await waitFor(() => expect(shareOrDownload).toHaveBeenCalledOnce())
     const files = filesFromCall()
-    expect(files[0].name).toBe('trip.zip')
+    expect(files).toHaveLength(2)
+    expect(files.map((f) => f.name)).toEqual(['trip-1.png', 'trip-2.png'])
   })
 })
