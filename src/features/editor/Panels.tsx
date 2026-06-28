@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react'
 import { useStore } from 'zustand'
 import { useTranslation } from 'react-i18next'
 import { useEditorStore, editorTemporal } from '../../store/editorStore'
@@ -6,6 +7,8 @@ import { IconButton } from '../../components/ui'
 import { Undo, Redo, Plus, Copy, Trash } from '../../components/icons'
 import { useAssetUrls } from '../../hooks/useAssetUrls'
 import { collectAssetIds } from '../../lib/project-io'
+import { importFiles } from '../../lib/asset-import'
+import { isImageFile } from '../../lib/images'
 import type { Adjustments, CollagePhoto, Page, Project } from '../../types/project'
 
 const FILTERS: Record<string, Partial<Adjustments>> = {
@@ -182,7 +185,48 @@ function AdjustControls({
   )
 }
 
-/** Tira de miniaturas das fotos do projeto, para escolher. */
+/** Tile para adicionar mais fotos ao projeto a qualquer momento. */
+function AddPhotoTile() {
+  const { t } = useTranslation()
+  const addAssetsToPool = useEditorStore((s) => s.addAssetsToPool)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [busy, setBusy] = useState(false)
+
+  async function onFiles(list: FileList | null) {
+    const files = Array.from(list ?? []).filter(isImageFile)
+    if (!files.length) return
+    setBusy(true)
+    try {
+      const assets = await importFiles(files)
+      addAssetsToPool(assets.map((a) => a.id))
+    } finally {
+      setBusy(false)
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className="thumb thumb--add"
+      aria-label={t('editor.addPhotos')}
+      onClick={() => inputRef.current?.click()}
+      disabled={busy}
+    >
+      {busy ? '…' : <Plus />}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*,.heic,.heif"
+        multiple
+        hidden
+        onChange={(e) => onFiles(e.target.files)}
+      />
+    </button>
+  )
+}
+
+/** Tira de miniaturas das fotos do projeto, para escolher (com "adicionar"). */
 function AssetThumbs({
   assetIds,
   selectedId,
@@ -218,6 +262,7 @@ function AssetThumbs({
           onClick={() => onPick(id)}
         />
       ))}
+      <AddPhotoTile />
     </div>
   )
 }
