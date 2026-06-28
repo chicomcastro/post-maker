@@ -940,6 +940,18 @@ a {
   text-align: center;
   line-height: 1.1;
 }
+.thumb--add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-style: dashed;
+  color: var(--accent);
+  font-weight: 700;
+}
+.thumb--add svg {
+  width: 22px;
+  height: 22px;
+}
 
 .btn--danger {
   color: #dc2626;

@@ -71,8 +71,7 @@ test('fluxo completo: criar carrossel → editor → persiste → exporta', asyn
 
   await expect(page.getByRole('heading', { name: /selecione suas fotos/i })).toBeVisible()
   await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL, SMALL, SMALL, SMALL])
-  // carousel3-diagonal tem 6 slots de colagem; progresso mostra 7/6
-  await expect(page.getByText('7/6 fotos')).toBeVisible()
+  await expect(page.getByText(/7 fotos selecionadas/i)).toBeVisible()
 
   await page.getByRole('button', { name: /criar projeto/i }).click()
 
@@ -122,10 +121,10 @@ async function createTrioProject(page: Page) {
   await page.getByRole('button', { name: /criar novo/i }).click()
   await page.getByRole('button', { name: /quadrado/i }).click()
   await page.getByRole('button', { name: 'post-trio-scatter' }).click()
-  // o passo de fotos indica quantas o layout usa
-  await expect(page.getByText(/este layout usa 3 fotos/i)).toBeVisible()
+  // o passo de fotos indica a capacidade (slots + fundo opcional = 4)
+  await expect(page.getByText(/comporta até 4 fotos/i)).toBeVisible()
   await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL])
-  await expect(page.getByText('4/3 fotos')).toBeVisible()
+  await expect(page.getByText(/4 fotos selecionadas/i)).toBeVisible()
   await page.getByRole('button', { name: /criar projeto/i }).click()
   await expect(page.locator('canvas')).toBeVisible()
 }
@@ -134,6 +133,22 @@ async function selectCenterPhoto(page: Page) {
   const box = await page.locator('canvas').boundingBox()
   if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
 }
+
+test('adiciona mais fotos ao projeto durante a edição', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await createTrioProject(page)
+
+  // Painel de fundo mostra as miniaturas do pool. Conta as fotos atuais.
+  await expect(page.getByText(/imagem de fundo/i)).toBeVisible()
+  const photos = page.locator('.thumbs .thumb:not(.thumb--none):not(.thumb--add)')
+  const before = await photos.count()
+
+  // Adiciona 2 fotos pelo tile "+" e o pool cresce.
+  await page.locator('.thumb--add input[type=file]').setInputFiles([IMG, SMALL])
+  await expect(photos).toHaveCount(before + 2)
+
+  expect(errors).toEqual([])
+})
 
 test('background começa vazio e pode ser escolhido entre as fotos', async ({ page }) => {
   const errors = guardPageErrors(page)

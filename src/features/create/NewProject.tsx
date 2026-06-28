@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ASPECT_RATIOS, type AspectRatio } from '../../types/project'
 import {
   TEMPLATES,
-  templateCollageCount,
+  templatePhotoCapacity,
   type Template,
   type TemplateKind,
 } from '../../templates/catalog'
@@ -159,13 +159,9 @@ export function NewProject() {
           <section className="create__step">
             <h1>{t('create.stepPhotos')}</h1>
             <p className="muted create__hint">
-              {t('create.photosHint', { count: templateCollageCount(template) })}
+              {t('create.photosHint', { count: templatePhotoCapacity(template) })}
             </p>
-            <PhotoPicker
-              files={files}
-              onChange={setFiles}
-              target={templateCollageCount(template)}
-            />
+            <PhotoPicker files={files} onChange={setFiles} />
             {error && <p className="error">{error}</p>}
           </section>
         )}
@@ -182,15 +178,7 @@ export function NewProject() {
   )
 }
 
-function PhotoPicker({
-  files,
-  onChange,
-  target,
-}: {
-  files: File[]
-  onChange: (files: File[]) => void
-  target: number
-}) {
+function PhotoPicker({ files, onChange }: { files: File[]; onChange: (files: File[]) => void }) {
   const { t } = useTranslation()
   const [urls, setUrls] = useState<string[]>([])
   const [dragOver, setDragOver] = useState(false)
@@ -236,7 +224,7 @@ function PhotoPicker({
       {files.length > 0 && (
         <>
           <p className="muted" style={{ margin: '12px 2px 0' }}>
-            {t('create.photosProgress', { selected: files.length, count: target })}
+            {t('create.selectedCount', { count: files.length })}
           </p>
           <div className="photo-grid">
             {urls.map((url, i) => (

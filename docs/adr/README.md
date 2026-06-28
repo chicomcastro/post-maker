@@ -29,3 +29,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0020](0020-exportar-imagens-direto-e-performance.md)     | Exportar imagens direto (sem zip) e performance       | Aceito |
 | [0021](0021-orientacao-de-slot-e-enquadramento.md)        | Orientação do slot e enquadramento da foto            | Aceito |
 | [0022](0022-arrastar-para-enquadrar.md)                   | Arrastar a foto para enquadrar (vs mover o slot)      | Aceito |
+| [0023](0023-adicionar-fotos-a-qualquer-momento.md)        | Adicionar fotos a qualquer momento e contagem honesta | Aceito |

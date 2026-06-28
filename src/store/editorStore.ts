@@ -33,6 +33,8 @@ export interface EditorState {
   setBgColor: (color: string) => void
   /** Define (ou remove com null) a imagem de fundo compartilhada. */
   setBackgroundAsset: (assetId: string | null) => void
+  /** Acrescenta fotos importadas ao pool do projeto (a qualquer momento). */
+  addAssetsToPool: (assetIds: string[]) => void
   updateCollagePhoto: (
     pageId: string,
     photoId: string,
@@ -144,6 +146,18 @@ export const useEditorStore = create<EditorState>()(
                 project: withTimestamp({
                   ...s.project,
                   background: { ...s.project.background, assetId },
+                }),
+              }
+            : s,
+        ),
+
+      addAssetsToPool: (assetIds) =>
+        set((s) =>
+          s.project && assetIds.length
+            ? {
+                project: withTimestamp({
+                  ...s.project,
+                  assetPool: [...s.project.assetPool, ...assetIds],
                 }),
               }
             : s,
