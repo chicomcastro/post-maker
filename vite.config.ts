@@ -1,48 +1,20 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
 
 // Publicado em https://<usuario>.github.io/post-maker/ — o base precisa casar
 // com o nome do repositório no GitHub Pages (domínio padrão).
 const BASE = '/post-maker/'
 
+// NOTA: o PWA/service worker foi REMOVIDO. O service worker estava causando
+// telas brancas (cache antigo apontando para chunks removidos) e, na tentativa
+// de resgate com SW autodestrutivo, um loop de reload. Por ora servimos uma SPA
+// simples, sem SW. O index.html ainda desregistra SWs remanescentes na carga.
+// Reativar offline depois exige cuidado (navegação NetworkFirst + sem loop).
 export default defineConfig({
   base: BASE,
-  // Alvo conservador para suportar Safari/iOS mais antigos (evita tela branca
-  // por sintaxe moderna não suportada no motor do usuário).
+  // Alvo conservador para suportar Safari/iOS mais antigos.
   build: { target: ['es2019', 'safari13', 'chrome80', 'firefox72', 'edge88'] },
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      // RESGATE: service worker autodestrutivo. Usuários presos num SW antigo
-      // (que servia um index em cache apontando para chunks já removidos -> tela
-      // branca) recebem este SW no próximo update-check; ele desregistra a si
-      // mesmo, limpa os caches e recarrega na versão de rede. PWA/offline fica
-      // temporariamente desativado até reabilitarmos (com navegação NetworkFirst).
-      selfDestroying: true,
-      includeAssets: ['favicon.svg'],
-      workbox: {
-        // heic2any (~1.3MB) é carregado sob demanda; não vale precachear no SW.
-        globIgnores: ['**/heic2any-*.js'],
-      },
-      manifest: {
-        name: 'Post Maker',
-        short_name: 'Post Maker',
-        description: 'Crie carrosséis de fotos lindos para o Instagram em minutos.',
-        theme_color: '#111827',
-        background_color: '#ffffff',
-        display: 'standalone',
-        start_url: BASE,
-        scope: BASE,
-        icons: [
-          { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-        ],
-      },
-    }),
-  ],
+  plugins: [react()],
   test: {
     globals: true,
     environment: 'jsdom',
