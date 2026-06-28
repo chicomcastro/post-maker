@@ -1,7 +1,9 @@
 import {
   DEFAULT_BG_COLOR,
+  DEFAULT_CROP,
   type Background,
   type CollagePhoto,
+  type Crop,
   type Page,
   type Project,
 } from '../types/project'
@@ -23,6 +25,18 @@ type LegacyProject = Partial<Project> & {
   pages?: LegacyPage[]
 }
 
+// Garante que a foto de colagem tenha um `crop` válido (formatos antigos não
+// tinham enquadramento dentro do slot).
+function normalizeCollagePhoto(photo: CollagePhoto): CollagePhoto {
+  const c = (photo as Partial<CollagePhoto>).crop as Partial<Crop> | undefined
+  const crop: Crop = {
+    x: typeof c?.x === 'number' ? c.x : DEFAULT_CROP.x,
+    y: typeof c?.y === 'number' ? c.y : DEFAULT_CROP.y,
+    scale: typeof c?.scale === 'number' && c.scale >= 1 ? c.scale : DEFAULT_CROP.scale,
+  }
+  return { ...photo, crop }
+}
+
 export function normalizeProject(raw: unknown): Project {
   const p = (raw ?? {}) as LegacyProject
   const pages: LegacyPage[] = Array.isArray(p.pages) ? p.pages : []
@@ -35,7 +49,7 @@ export function normalizeProject(raw: unknown): Project {
 
   const normalizedPages = pages.map((pg) => ({
     id: String(pg.id ?? ''),
-    collage: Array.isArray(pg.collage) ? pg.collage : [],
+    collage: (Array.isArray(pg.collage) ? pg.collage : []).map(normalizeCollagePhoto),
   }))
 
   // assetPool: usa o existente; senão deriva do que está em uso (bg + colagem).

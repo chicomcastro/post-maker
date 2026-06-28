@@ -4,7 +4,6 @@ import Konva from 'konva'
 import type { Background, CollagePhoto, Page, AspectRatio } from '../../../types/project'
 import {
   continuousBackgroundCropRect,
-  coverRect,
   photoPixelRect,
   nodeToTransform,
   stageSizeFor,
@@ -175,15 +174,22 @@ function CollageImage({
   const img = useAssetImage(photo.assetId)
   const ref = useRef<Konva.Image>(null)
   const rect = photoPixelRect(photo, stage)
+  // Recorte "cover" + enquadramento (zoom/pan) dentro do slot — mesma matemática
+  // do background, aplicada ao tamanho do slot.
   const crop = img
-    ? coverRect(
+    ? continuousBackgroundCropRect(
         { width: img.naturalWidth, height: img.naturalHeight },
         { width: rect.width, height: rect.height },
+        photo.crop.scale,
+        photo.crop.x - 0.5,
+        photo.crop.y - 0.5,
+        0,
+        1,
       )
     : undefined
 
   // Re-cacheia quando qualquer atributo visual muda (ajustes, borda, cantos,
-  // sombra, tamanho). Sem isso o nó cacheado mantém o desenho antigo.
+  // sombra, tamanho, enquadramento). Sem isso o nó cacheado mantém o desenho antigo.
   useEffect(() => {
     const node = ref.current
     if (!node) return
@@ -196,6 +202,9 @@ function CollageImage({
     photo.style.borderColor,
     photo.style.shadow,
     photo.frame.cornerRadius,
+    photo.crop.scale,
+    photo.crop.x,
+    photo.crop.y,
     rect.width,
     rect.height,
   ])

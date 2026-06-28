@@ -7,7 +7,6 @@ import { getAsset } from './storage'
 import {
   adjustmentsToFilter,
   continuousBackgroundCropRect,
-  coverRect,
   photoPixelRect,
   stageSizeFor,
 } from './editor-geometry'
@@ -129,9 +128,14 @@ export function renderPage(
     roundedPath(ctx, x, y, rect.width, rect.height, cornerPx)
     ctx.clip()
     if (img) {
-      const crop = coverRect(
+      const crop = continuousBackgroundCropRect(
         { width: img.naturalWidth, height: img.naturalHeight },
         { width: rect.width, height: rect.height },
+        photo.crop.scale,
+        photo.crop.x - 0.5,
+        photo.crop.y - 0.5,
+        0,
+        1,
       )
       withFilter(ctx, photo.adjustments, () => {
         ctx.drawImage(img, crop.x, crop.y, crop.width, crop.height, x, y, rect.width, rect.height)

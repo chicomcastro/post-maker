@@ -56,6 +56,18 @@ export const DEFAULT_PHOTO_STYLE: PhotoStyle = {
   shadow: true,
 }
 
+/** Enquadramento da foto DENTRO do slot (pan + zoom sobre o recorte "cover"). */
+export interface Crop {
+  /** Posição horizontal do recorte (0–1, 0.5 = centro). */
+  x: number
+  /** Posição vertical do recorte (0–1, 0.5 = centro). */
+  y: number
+  /** Zoom do recorte (>= 1). */
+  scale: number
+}
+
+export const DEFAULT_CROP: Crop = { x: 0.5, y: 0.5, scale: 1 }
+
 /** Uma foto de colagem (sobreposta ao background). */
 export interface CollagePhoto {
   id: string
@@ -63,6 +75,8 @@ export interface CollagePhoto {
   transform: Transform
   /** Tamanho do frame normalizado (fração da página). */
   frame: { width: number; height: number; cornerRadius: number }
+  /** Enquadramento da foto dentro do slot (mover/zoom para enquadrar). */
+  crop: Crop
   style: PhotoStyle
   adjustments: Adjustments
 }

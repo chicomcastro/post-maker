@@ -3,6 +3,7 @@ import { getTemplate, type Template } from '../templates/catalog'
 import {
   DEFAULT_BG_COLOR,
   DEFAULT_CORNER_RADIUS,
+  DEFAULT_CROP,
   DEFAULT_PHOTO_STYLE,
   NEUTRAL_ADJUSTMENTS,
   type AspectRatio,
@@ -27,6 +28,7 @@ function makeCollagePhoto(slot: ArrangementSlot): CollagePhoto {
     assetId: null,
     transform: { x: slot.x, y: slot.y, scale: 1, rotation: slot.rotation },
     frame: { width: slot.w, height: slot.h, cornerRadius: DEFAULT_CORNER_RADIUS },
+    crop: { ...DEFAULT_CROP },
     style: { ...DEFAULT_PHOTO_STYLE },
     adjustments: { ...NEUTRAL_ADJUSTMENTS },
   }

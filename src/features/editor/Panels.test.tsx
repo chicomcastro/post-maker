@@ -154,4 +154,38 @@ describe('SidePanel — foto', () => {
     const page2 = useEditorStore.getState().project!.pages.find((p) => p.id === pageId)!
     expect(page2.collage[0].id).toBe(photoId)
   })
+
+  it('muda a orientação do slot para paisagem', () => {
+    const project = setup()
+    const pageId = project.pages[0].id
+    const photoId = project.pages[0].collage[0].id
+    useEditorStore.setState({ selectedPhotoId: photoId })
+
+    render(<SidePanel project={useEditorStore.getState().project!} />)
+    fireEvent.click(screen.getByRole('button', { name: /paisagem/i }))
+
+    const photo = useEditorStore
+      .getState()
+      .project!.pages.find((p) => p.id === pageId)!
+      .collage.find((c) => c.id === photoId)!
+    expect(photo.frame.width).toBeGreaterThan(photo.frame.height)
+  })
+
+  it('enquadra a foto no slot (crop) pelos sliders de posição', () => {
+    const project = setup()
+    const pageId = project.pages[0].id
+    const photoId = project.pages[0].collage[0].id
+    useEditorStore.setState({ selectedPhotoId: photoId })
+
+    render(<SidePanel project={useEditorStore.getState().project!} />)
+    // o slider de Posição X é o 2º na ordem (Zoom, Posição X, Posição Y, ...)
+    const posX = screen.getByText('Posição X').closest('label')!.querySelector('input')!
+    fireEvent.change(posX, { target: { value: '0.9' } })
+
+    const photo = useEditorStore
+      .getState()
+      .project!.pages.find((p) => p.id === pageId)!
+      .collage.find((c) => c.id === photoId)!
+    expect(photo.crop.x).toBeCloseTo(0.9)
+  })
 })
