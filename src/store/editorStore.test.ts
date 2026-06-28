@@ -92,6 +92,16 @@ describe('editorStore — edição de fotos e fundo', () => {
   })
 })
 
+describe('editorStore — modo de interação', () => {
+  it('começa em "frame" e alterna sem entrar no histórico', () => {
+    load('post-solo')
+    expect(useEditorStore.getState().interactionMode).toBe('frame')
+    useEditorStore.getState().setInteractionMode('move')
+    expect(useEditorStore.getState().interactionMode).toBe('move')
+    expect(editorTemporal.getState().pastStates.length).toBe(0)
+  })
+})
+
 describe('editorStore — undo/redo', () => {
   it('desfaz e refaz uma renomeação', () => {
     load('post-solo')

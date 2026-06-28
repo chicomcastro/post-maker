@@ -465,6 +465,14 @@ a {
   padding: 3px;
   gap: 2px;
 }
+/* Variante que ocupa a largura toda, com itens de tamanho igual. */
+.segmented--block {
+  display: flex;
+}
+.segmented--block .segmented__item {
+  flex: 1;
+  text-align: center;
+}
 .segmented__item {
   border: none;
   background: transparent;

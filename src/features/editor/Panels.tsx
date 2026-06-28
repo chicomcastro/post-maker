@@ -353,6 +353,8 @@ function PhotoControls({
   const removeCollagePhoto = useEditorStore((s) => s.removeCollagePhoto)
   const bringToFront = useEditorStore((s) => s.bringPhotoToFront)
   const sendToBack = useEditorStore((s) => s.sendPhotoToBack)
+  const interactionMode = useEditorStore((s) => s.interactionMode)
+  const setInteractionMode = useEditorStore((s) => s.setInteractionMode)
   const update = (updater: (p: CollagePhoto) => CollagePhoto) =>
     updateCollagePhoto(pageId, photo.id, updater)
 
@@ -401,6 +403,30 @@ function PhotoControls({
 
       {photo.assetId && (
         <>
+          <div className="panel__group">
+            <span className="field-label">{t('editor.dragDoes')}</span>
+            <div className="segmented segmented--block">
+              <button
+                type="button"
+                className={
+                  'segmented__item' +
+                  (interactionMode === 'frame' ? ' segmented__item--active' : '')
+                }
+                onClick={() => setInteractionMode('frame')}
+              >
+                {t('editor.dragFrame')}
+              </button>
+              <button
+                type="button"
+                className={
+                  'segmented__item' + (interactionMode === 'move' ? ' segmented__item--active' : '')
+                }
+                onClick={() => setInteractionMode('move')}
+              >
+                {t('editor.dragMove')}
+              </button>
+            </div>
+          </div>
           <div className="panel__group">
             <span className="field-label">{t('editor.framing')}</span>
             <Slider
