@@ -19,6 +19,7 @@ type LegacyPage = Partial<Page> & {
 type LegacyProject = Partial<Project> & {
   background?: Background
   bgColor?: string
+  assetPool?: string[]
   pages?: LegacyPage[]
 }
 
@@ -32,6 +33,22 @@ export function normalizeProject(raw: unknown): Project {
   const background: Background = p.background ?? legacyPageBg ?? makeBackground()
   const bgColor = p.bgColor ?? pages.find((pg) => pg.bgColor)?.bgColor ?? DEFAULT_BG_COLOR
 
+  const normalizedPages = pages.map((pg) => ({
+    id: String(pg.id ?? ''),
+    collage: Array.isArray(pg.collage) ? pg.collage : [],
+  }))
+
+  // assetPool: usa o existente; senão deriva do que está em uso (bg + colagem).
+  let assetPool: string[]
+  if (Array.isArray(p.assetPool)) {
+    assetPool = p.assetPool
+  } else {
+    const used = new Set<string>()
+    if (background.assetId) used.add(background.assetId)
+    for (const pg of normalizedPages) for (const c of pg.collage) if (c.assetId) used.add(c.assetId)
+    assetPool = [...used]
+  }
+
   return {
     id: String(p.id ?? ''),
     name: p.name ?? 'Projeto',
@@ -41,9 +58,7 @@ export function normalizeProject(raw: unknown): Project {
     templateId: p.templateId ?? '',
     background,
     bgColor,
-    pages: pages.map((pg) => ({
-      id: String(pg.id ?? ''),
-      collage: Array.isArray(pg.collage) ? pg.collage : [],
-    })),
+    assetPool,
+    pages: normalizedPages,
   }
 }

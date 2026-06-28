@@ -5,15 +5,17 @@ import { createProjectFromTemplate, distributePhotos } from '../lib/project-fact
 
 describe('PagePreview', () => {
   it('renderiza o background e cada foto de colagem posicionada', () => {
-    const base = createProjectFromTemplate('post-trio-scatter') // 1 bg + 3 colagens
-    const { project } = distributePhotos(base, ['bg', 'p1', 'p2', 'p3'])
+    const base = createProjectFromTemplate('post-trio-scatter') // A5 => 3 colagens
+    const { project } = distributePhotos(base, ['p1', 'p2', 'p3'])
+    // background é escolhido depois; aqui simulamos uma foto definida como fundo
+    const background = { ...project.background, assetId: 'bg' }
     const page = project.pages[0]
     const urls = { bg: 'blob:bg', p1: 'blob:p1', p2: 'blob:p2', p3: 'blob:p3' }
 
     const { container } = render(
       <PagePreview
         page={page}
-        background={project.background}
+        background={background}
         bgColor={project.bgColor}
         aspectRatio={project.aspectRatio}
         urls={urls}

@@ -16,8 +16,8 @@ de graça, e **suas fotos nunca saem do seu aparelho**.
 
 ## ✨ O que dá pra fazer
 
-- 🖼️ **Uma foto vira o fundo** da página e outras entram em **colagem por cima**,
-  em ângulos e posições bonitas.
+- 🖼️ **Colagem com fundo opcional**: monte a colagem e, quando quiser, escolha
+  qualquer foto como **fundo compartilhado** do carrossel — ou nenhuma.
 - 🎠 **Posts e carrosséis** de 1 a 4 páginas, prontos para o feed.
 - 🎨 **Templates lindos e personalizáveis** — mexa, incline e redimensione cada
   foto à vontade.

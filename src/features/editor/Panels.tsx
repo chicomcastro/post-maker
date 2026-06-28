@@ -180,58 +180,94 @@ function AdjustControls({
   )
 }
 
-/** Painel contextual (bottom sheet): edita a foto selecionada ou a página/fundo. */
+/** Tira de miniaturas das fotos do projeto, para escolher. */
+function AssetThumbs({
+  assetIds,
+  selectedId,
+  onPick,
+  allowNone,
+  noneLabel,
+}: {
+  assetIds: string[]
+  selectedId: string | null
+  onPick: (id: string | null) => void
+  allowNone?: boolean
+  noneLabel?: string
+}) {
+  const urls = useAssetUrls(assetIds)
+  return (
+    <div className="thumbs">
+      {allowNone && (
+        <button
+          type="button"
+          className={'thumb thumb--none' + (selectedId == null ? ' thumb--active' : '')}
+          onClick={() => onPick(null)}
+        >
+          {noneLabel}
+        </button>
+      )}
+      {assetIds.map((id) => (
+        <button
+          key={id}
+          type="button"
+          aria-label="foto"
+          className={'thumb' + (id === selectedId ? ' thumb--active' : '')}
+          style={{ backgroundImage: urls[id] ? `url(${urls[id]})` : undefined }}
+          onClick={() => onPick(id)}
+        />
+      ))}
+    </div>
+  )
+}
+
+/** Painel contextual (bottom sheet): edita a foto selecionada ou o fundo. */
 export function SidePanel({ project }: { project: Project }) {
-  const { t } = useTranslation()
   const page = project.pages[useEditorStore((s) => s.currentPageIndex)] as Page | undefined
   const selectedPhotoId = useEditorStore((s) => s.selectedPhotoId)
-  const updateCollagePhoto = useEditorStore((s) => s.updateCollagePhoto)
-  const updateBackground = useEditorStore((s) => s.updateBackground)
-  const setBgColor = useEditorStore((s) => s.setBgColor)
-  const bringToFront = useEditorStore((s) => s.bringPhotoToFront)
-  const sendToBack = useEditorStore((s) => s.sendPhotoToBack)
   if (!page) return null
-
   const photo = page.collage.find((p) => p.id === selectedPhotoId)
-  const background = project.background
 
   return (
     <div className="sheet">
       <div className="sheet__grip" />
       {photo ? (
-        <PhotoControls
-          key={photo.id}
-          photo={photo}
-          onUpdate={(updater) => updateCollagePhoto(page.id, photo.id, updater)}
-          onFront={() => bringToFront(page.id, photo.id)}
-          onBack={() => sendToBack(page.id, photo.id)}
-        />
+        <PhotoControls key={photo.id} pageId={page.id} photo={photo} pool={project.assetPool} />
       ) : (
+        <BackgroundControls project={project} />
+      )}
+    </div>
+  )
+}
+
+function BackgroundControls({ project }: { project: Project }) {
+  const { t } = useTranslation()
+  const updateBackground = useEditorStore((s) => s.updateBackground)
+  const setBgColor = useEditorStore((s) => s.setBgColor)
+  const setBackgroundAsset = useEditorStore((s) => s.setBackgroundAsset)
+  const bg = project.background
+  const hasImage = !!bg.assetId
+
+  return (
+    <>
+      <h3 className="panel__title">{t('editor.background')}</h3>
+
+      <div className="panel__group">
+        <span className="field-label">{t('editor.backgroundImage')}</span>
+        <AssetThumbs
+          assetIds={project.assetPool}
+          selectedId={bg.assetId}
+          onPick={setBackgroundAsset}
+          allowNone
+          noneLabel={t('editor.noBackground')}
+        />
+      </div>
+
+      {hasImage ? (
         <>
-          <h3 className="panel__title">{t('editor.background')}</h3>
           <div className="panel__group">
-            <div className="swatches">
-              {BG_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className={'swatch' + (project.bgColor === c ? ' swatch--active' : '')}
-                  style={{ background: c }}
-                  aria-label={c}
-                  onClick={() => setBgColor(c)}
-                />
-              ))}
-              <input
-                type="color"
-                className="swatch-input"
-                aria-label={t('editor.bgColor')}
-                value={project.bgColor}
-                onChange={(e) => setBgColor(e.target.value)}
-              />
-            </div>
             <Slider
               label={t('editor.zoom')}
-              value={background.transform.scale}
+              value={bg.transform.scale}
               min={1}
               max={3}
               step={0.05}
@@ -241,7 +277,7 @@ export function SidePanel({ project }: { project: Project }) {
             />
             <Slider
               label={t('editor.panX')}
-              value={background.transform.x}
+              value={bg.transform.x}
               min={0}
               max={1}
               step={0.02}
@@ -251,7 +287,7 @@ export function SidePanel({ project }: { project: Project }) {
             />
             <Slider
               label={t('editor.panY')}
-              value={background.transform.y}
+              value={bg.transform.y}
               min={0}
               max={1}
               step={0.02}
@@ -261,70 +297,128 @@ export function SidePanel({ project }: { project: Project }) {
             />
           </div>
           <AdjustControls
-            adjustments={background.adjustments}
+            adjustments={bg.adjustments}
             onChange={(adjustments) => updateBackground((b) => ({ ...b, adjustments }))}
           />
+          <button
+            type="button"
+            className="btn btn--ghost btn--block"
+            onClick={() => setBackgroundAsset(null)}
+          >
+            {t('editor.removeBackground')}
+          </button>
         </>
+      ) : (
+        <div className="panel__group">
+          <span className="field-label">{t('editor.bgColor')}</span>
+          <div className="swatches">
+            {BG_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={'swatch' + (project.bgColor === c ? ' swatch--active' : '')}
+                style={{ background: c }}
+                aria-label={c}
+                onClick={() => setBgColor(c)}
+              />
+            ))}
+            <input
+              type="color"
+              className="swatch-input"
+              aria-label={t('editor.bgColor')}
+              value={project.bgColor}
+              onChange={(e) => setBgColor(e.target.value)}
+            />
+          </div>
+        </div>
       )}
-    </div>
+    </>
   )
 }
 
 function PhotoControls({
+  pageId,
   photo,
-  onUpdate,
-  onFront,
-  onBack,
+  pool,
 }: {
+  pageId: string
   photo: CollagePhoto
-  onUpdate: (updater: (p: CollagePhoto) => CollagePhoto) => void
-  onFront: () => void
-  onBack: () => void
+  pool: string[]
 }) {
   const { t } = useTranslation()
+  const updateCollagePhoto = useEditorStore((s) => s.updateCollagePhoto)
+  const setCollagePhotoAsset = useEditorStore((s) => s.setCollagePhotoAsset)
+  const removeCollagePhoto = useEditorStore((s) => s.removeCollagePhoto)
+  const bringToFront = useEditorStore((s) => s.bringPhotoToFront)
+  const sendToBack = useEditorStore((s) => s.sendPhotoToBack)
+  const update = (updater: (p: CollagePhoto) => CollagePhoto) =>
+    updateCollagePhoto(pageId, photo.id, updater)
+
   return (
     <>
-      <h3 className="panel__title">{t('editor.photo')}</h3>
-      <AdjustControls
-        adjustments={photo.adjustments}
-        onChange={(adjustments) => onUpdate((p) => ({ ...p, adjustments }))}
-      />
+      <h3 className="panel__title">{photo.assetId ? t('editor.photo') : t('editor.emptySlot')}</h3>
+
       <div className="panel__group">
-        <label className="switch">
-          {t('editor.shadow')}
-          <input
-            type="checkbox"
-            checked={photo.style.shadow}
-            onChange={(e) =>
-              onUpdate((p) => ({ ...p, style: { ...p.style, shadow: e.target.checked } }))
-            }
-          />
-        </label>
-        <Slider
-          label={t('editor.border')}
-          value={photo.style.borderWidth}
-          min={0}
-          max={12}
-          step={1}
-          onChange={(v) => onUpdate((p) => ({ ...p, style: { ...p.style, borderWidth: v } }))}
+        {!photo.assetId && <span className="field-label">{t('editor.emptySlotHint')}</span>}
+        <AssetThumbs
+          assetIds={pool}
+          selectedId={photo.assetId}
+          onPick={(id) => setCollagePhotoAsset(pageId, photo.id, id)}
         />
-        <Slider
-          label={t('editor.corner')}
-          value={photo.frame.cornerRadius}
-          min={0}
-          max={0.25}
-          step={0.01}
-          onChange={(v) => onUpdate((p) => ({ ...p, frame: { ...p.frame, cornerRadius: v } }))}
-        />
-        <div className="filter-row">
-          <button type="button" className="chip" onClick={onFront}>
-            {t('editor.toFront')}
-          </button>
-          <button type="button" className="chip" onClick={onBack}>
-            {t('editor.toBack')}
-          </button>
-        </div>
       </div>
+
+      {photo.assetId && (
+        <>
+          <AdjustControls
+            adjustments={photo.adjustments}
+            onChange={(adjustments) => update((p) => ({ ...p, adjustments }))}
+          />
+          <div className="panel__group">
+            <label className="switch">
+              {t('editor.shadow')}
+              <input
+                type="checkbox"
+                checked={photo.style.shadow}
+                onChange={(e) =>
+                  update((p) => ({ ...p, style: { ...p.style, shadow: e.target.checked } }))
+                }
+              />
+            </label>
+            <Slider
+              label={t('editor.border')}
+              value={photo.style.borderWidth}
+              min={0}
+              max={12}
+              step={1}
+              onChange={(v) => update((p) => ({ ...p, style: { ...p.style, borderWidth: v } }))}
+            />
+            <Slider
+              label={t('editor.corner')}
+              value={photo.frame.cornerRadius}
+              min={0}
+              max={0.25}
+              step={0.01}
+              onChange={(v) => update((p) => ({ ...p, frame: { ...p.frame, cornerRadius: v } }))}
+            />
+            <div className="filter-row">
+              <button type="button" className="chip" onClick={() => bringToFront(pageId, photo.id)}>
+                {t('editor.toFront')}
+              </button>
+              <button type="button" className="chip" onClick={() => sendToBack(pageId, photo.id)}>
+                {t('editor.toBack')}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      <button
+        type="button"
+        className="btn btn--ghost btn--block btn--danger"
+        onClick={() => removeCollagePhoto(pageId, photo.id)}
+      >
+        {t('editor.deletePhoto')}
+      </button>
     </>
   )
 }
