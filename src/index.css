@@ -386,13 +386,33 @@ a {
 .template-preview {
   position: relative;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px;
   background: #161c28;
   overflow: hidden;
+}
+/* Uma página do template (mini). Largura define-se pelo flex/width e a altura
+   vem do aspect-ratio — assim o card cresce conforme as páginas. */
+.template-preview__page {
+  position: relative;
+  background: #0f1420;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.template-preview--multi .template-preview__page {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.template-preview:not(.template-preview--multi) .template-preview__page {
+  width: 64%;
 }
 .template-preview__slot {
   position: absolute;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 4px;
+  border-radius: 3px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 .template-preview__badge {
