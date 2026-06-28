@@ -184,7 +184,7 @@ test('clicar no fundo deseleciona a foto (volta ao painel de fundo)', async ({ p
   expect(errors).toEqual([])
 })
 
-test('pré-visualização do carrossel abre e desliza entre páginas', async ({ page }) => {
+test('pré-visualização do carrossel abre, desliza e oferece exportar imagens', async ({ page }) => {
   const errors = guardPageErrors(page)
   await page.goto(APP)
   await page.getByRole('button', { name: /criar novo/i }).click()
@@ -199,10 +199,39 @@ test('pré-visualização do carrossel abre e desliza entre páginas', async ({ 
   const slides = page.locator('.preview-slide img')
   await expect(slides).toHaveCount(3)
   await expect(slides.first()).toBeVisible()
+  // ação final de exportar/compartilhar imagens disponível no preview
+  await expect(page.getByRole('button', { name: /salvar \/ compartilhar imagens/i })).toBeVisible()
 
   // fecha o preview
   await page.getByRole('dialog').getByRole('button').first().click()
   await expect(page.locator('.preview-overlay')).toHaveCount(0)
+
+  expect(errors).toEqual([])
+})
+
+test('renomeia o projeto e vê data, template e nº de fotos na listagem', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await page.goto(APP)
+  await page.getByRole('button', { name: /criar novo/i }).click()
+  await page.getByRole('button', { name: /quadrado/i }).click()
+  await page.getByRole('button', { name: 'post-trio-scatter' }).click()
+  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL])
+  await page.getByRole('button', { name: /criar projeto/i }).click()
+  await expect(page.locator('canvas')).toBeVisible()
+
+  // renomeia pelo título da barra
+  await page.getByRole('button', { name: /renomear projeto/i }).click()
+  const input = page.getByRole('textbox', { name: /renomear projeto/i })
+  await input.fill('Minha Viagem')
+  await input.press('Enter')
+  await expect(page.getByRole('button', { name: /renomear projeto/i })).toHaveText('Minha Viagem')
+
+  // volta à home: card mostra nome, template e nº de fotos
+  await page.getByRole('button', { name: /voltar para o início/i }).click()
+  await expect(page.getByRole('button', { name: /criar novo/i })).toBeVisible()
+  await expect(page.locator('.project-card__name')).toContainText('Minha Viagem')
+  await expect(page.locator('.project-card__tags')).toContainText('post-trio-scatter')
+  await expect(page.locator('.project-card__meta')).toContainText(/3 fotos/i)
 
   expect(errors).toEqual([])
 })

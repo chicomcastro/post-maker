@@ -12,7 +12,9 @@
     "openProject": "Abrir",
     "deleteProject": "Apagar",
     "pageCount_one": "{{count}} página",
-    "pageCount_other": "{{count}} páginas"
+    "pageCount_other": "{{count}} páginas",
+    "photoCount_one": "{{count}} foto",
+    "photoCount_other": "{{count}} fotos"
   },
   "language": {
     "label": "Idioma",
@@ -51,6 +53,7 @@
   },
   "editor": {
     "page": "Página {{n}}",
+    "renameProject": "Renomear projeto",
     "backHome": "Voltar para o início",
     "undo": "Desfazer",
     "redo": "Refazer",
@@ -90,6 +93,7 @@
     "preview": "Pré-visualizar",
     "previewTitle": "Pré-visualização do carrossel",
     "previewRendering": "Montando a pré-visualização…",
+    "exportImages": "Salvar / compartilhar imagens",
     "export": "Exportar",
     "exporting": "Renderizando…",
     "exportProgress": "Renderizando {{done}}/{{total}}…",

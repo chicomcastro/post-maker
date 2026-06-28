@@ -1,7 +1,9 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
+import { ProjectTitle } from './ProjectTitle'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useEditorStore, editorTemporal } from '../../store/editorStore'
+import type { Project } from '../../types/project'
 import { loadProject, saveProject } from '../../lib/storage'
 import { AppBar, IconButton } from '../../components/ui'
 import { ChevronLeft, Eye } from '../../components/icons'
@@ -23,6 +25,7 @@ export function EditorPage() {
   const setProject = useEditorStore((s) => s.setProject)
   const selectPhoto = useEditorStore((s) => s.selectPhoto)
   const updateCollagePhoto = useEditorStore((s) => s.updateCollagePhoto)
+  const rename = useEditorStore((s) => s.rename)
 
   const stageWrapRef = useRef<HTMLDivElement>(null)
   const [stageWidth, setStageWidth] = useState(320)
@@ -48,15 +51,25 @@ export function EditorPage() {
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
+    let pending: Project | null = null
+    const flush = () => {
+      if (pending) {
+        void saveProject(pending)
+        pending = null
+      }
+    }
     const unsub = useEditorStore.subscribe((s, prev) => {
       if (s.project && s.project !== prev.project) {
+        pending = s.project
         clearTimeout(timer)
-        const snapshot = s.project
-        timer = setTimeout(() => void saveProject(snapshot), 400)
+        timer = setTimeout(flush, 400)
       }
     })
     return () => {
+      // Descarrega mudanças pendentes ao sair (ex.: renomear e voltar logo em
+      // seguida) — antes o debounce era cancelado e a alteração se perdia.
       clearTimeout(timer)
+      flush()
       unsub()
     }
   }, [])
@@ -99,13 +112,22 @@ export function EditorPage() {
 
   const page = project.pages[currentPageIndex]
 
+  // Salva o estado atual antes de sair, para a listagem refletir o último nome/
+  // edição mesmo se o usuário voltar logo após mexer (evita corrida com o
+  // debounce do autosave).
+  async function goHome() {
+    const current = useEditorStore.getState().project
+    if (current) await saveProject(current)
+    navigate('/')
+  }
+
   return (
     <div className="editor">
       <AppBar
         dark
-        title={project.name}
+        title={<ProjectTitle name={project.name} onRename={rename} />}
         left={
-          <IconButton label={t('editor.backHome')} onClick={() => navigate('/')}>
+          <IconButton label={t('editor.backHome')} onClick={goHome}>
             <ChevronLeft />
           </IconButton>
         }
