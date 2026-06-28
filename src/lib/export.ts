@@ -8,10 +8,16 @@ export function slideFileName(index: number, total: number, baseName = 'post-mak
   return `${slug}-${String(index + 1).padStart(width, '0')}.png`
 }
 
-/** Nome do arquivo .zip a partir do nome do projeto. */
+/** Nome do arquivo .zip de imagens a partir do nome do projeto. */
 export function zipFileName(baseName = 'post-maker'): string {
   const slug = baseName.trim().replace(/\s+/g, '-').toLowerCase() || 'post-maker'
   return `${slug}.zip`
+}
+
+/** Nome do arquivo de projeto (.postmaker.zip), para backup/transferência. */
+export function projectFileName(baseName = 'post-maker'): string {
+  const slug = baseName.trim().replace(/\s+/g, '-').toLowerCase() || 'post-maker'
+  return `${slug}.postmaker.zip`
 }
 
 /** Empacota os PNGs num .zip. */

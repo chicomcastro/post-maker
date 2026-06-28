@@ -62,8 +62,8 @@ describe('EditorPage', () => {
     )
   })
 
-  it('redireciona para aviso quando o projeto não existe', async () => {
+  it('mostra aviso quando o projeto não existe', async () => {
     renderAt('nope')
-    await waitFor(() => expect(screen.getByText(/não tem projetos salvos/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/projeto não encontrado/i)).toBeInTheDocument())
   })
 })

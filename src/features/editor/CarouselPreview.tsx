@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { Project } from '../../types/project'
 import { renderProjectToDataUrls } from '../../lib/export-render'
@@ -15,7 +16,7 @@ export function CarouselPreview({ project, onClose }: { project: Project; onClos
   const { t } = useTranslation()
   const [urls, setUrls] = useState<string[] | null>(null)
   const [page, setPage] = useState(0)
-  const { busy, run } = useProjectExport(project)
+  const { busy, exportImages } = useProjectExport(project)
 
   useEffect(() => {
     let alive = true
@@ -36,7 +37,7 @@ export function CarouselPreview({ project, onClose }: { project: Project; onClos
 
   const total = urls?.length ?? project.pages.length
 
-  return (
+  return createPortal(
     <div
       className="preview-overlay"
       role="dialog"
@@ -82,7 +83,12 @@ export function CarouselPreview({ project, onClose }: { project: Project; onClos
             </div>
           )}
           <div className="preview-actions">
-            <button className="btn btn--block" type="button" onClick={run} disabled={!!busy}>
+            <button
+              className="btn btn--block"
+              type="button"
+              onClick={exportImages}
+              disabled={!!busy}
+            >
               <Share /> {busy ?? t('editor.exportImages')}
             </button>
           </div>
@@ -90,6 +96,7 @@ export function CarouselPreview({ project, onClose }: { project: Project; onClos
       ) : (
         <div className="preview-loading">{t('editor.previewRendering')}</div>
       )}
-    </div>
+    </div>,
+    document.body,
   )
 }

@@ -25,3 +25,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0016](0016-fluxo-fundo-opcional-e-edicao-de-slots.md)    | Fundo opcional escolhido depois e edição de slots     | Aceito |
 | [0017](0017-fundo-continuo-e-preview-carrossel.md)        | Fundo contínuo, preview do carrossel e responsividade | Aceito |
 | [0018](0018-nomear-projeto-listagem-rica-export-final.md) | Nomear projeto, listagem rica e exportar imagens      | Aceito |
+| [0019](0019-exportar-acao-principal-home-minimalista.md)  | Exportar como ação principal e home minimalista       | Aceito |

@@ -104,7 +104,7 @@ export function EditorPage() {
           }
         />
         <div className="route__scroll">
-          <p className="empty">{t('home.noProjects')}</p>
+          <p className="empty">{t('editor.notFound')}</p>
         </div>
       </>
     )

@@ -14,17 +14,16 @@ function renderHome() {
 }
 
 describe('Home', () => {
-  it('mostra a chamada principal e o botão de criar', async () => {
+  it('foca no botão de criar novo projeto', async () => {
     await i18n.changeLanguage('pt')
     renderHome()
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/postou nada/i)
-    expect(screen.getByRole('button', { name: /criar novo/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /criar novo projeto/i })).toBeInTheDocument()
   })
 
   it('troca o idioma para inglês pelo botão', async () => {
     await i18n.changeLanguage('pt')
     renderHome()
     await userEvent.click(screen.getByRole('button', { name: /idioma/i }))
-    expect(screen.getByRole('button', { name: /create new/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /create new project/i })).toBeInTheDocument()
   })
 })

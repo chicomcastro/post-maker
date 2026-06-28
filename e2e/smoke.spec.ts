@@ -18,8 +18,7 @@ function guardPageErrors(page: Page) {
 test('home carrega sem erros', async ({ page }) => {
   const errors = guardPageErrors(page)
   await page.goto(APP)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText(/postou nada/i)
-  await expect(page.getByRole('button', { name: /criar novo/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /criar novo projeto/i })).toBeVisible()
   expect(errors).toEqual([])
 })
 
@@ -84,9 +83,11 @@ test('fluxo completo: criar carrossel → editor → persiste → exporta', asyn
   await expect(page.getByRole('button', { name: /página 3/i })).toBeVisible()
   await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
 
-  // Exporta (carrossel => .zip via download).
+  // Exporta (carrossel => .zip via download). Exportar é a ação principal:
+  // abre o seletor e escolhemos "gerar imagens".
+  await page.getByRole('button', { name: /^exportar$/i }).click()
   const downloadPromise = page.waitForEvent('download')
-  await page.getByRole('button', { name: /exportar/i }).click()
+  await page.getByRole('button', { name: /gerar imagens/i }).click()
   const download = await downloadPromise
   expect(download.suggestedFilename()).toMatch(/\.zip$/)
 
@@ -232,6 +233,38 @@ test('renomeia o projeto e vê data, template e nº de fotos na listagem', async
   await expect(page.locator('.project-card__name')).toContainText('Minha Viagem')
   await expect(page.locator('.project-card__tags')).toContainText('post-trio-scatter')
   await expect(page.locator('.project-card__meta')).toContainText(/3 fotos/i)
+
+  // renomeia direto na listagem (lápis no card)
+  const card = page.locator('.project-card').first()
+  await card.getByRole('button', { name: /renomear projeto/i }).click()
+  const cardInput = card.getByRole('textbox', { name: /renomear projeto/i })
+  await cardInput.fill('Renomeado na lista')
+  await cardInput.press('Enter')
+  await expect(page.locator('.project-card__name')).toContainText('Renomeado na lista')
+
+  expect(errors).toEqual([])
+})
+
+test('exportar é a ação principal e oferece imagens ou arquivo do projeto', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await page.goto(APP)
+  await page.getByRole('button', { name: /criar novo/i }).click()
+  await page.getByRole('button', { name: /quadrado/i }).click()
+  await page.getByRole('button', { name: 'post-trio-scatter' }).click()
+  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL])
+  await page.getByRole('button', { name: /criar projeto/i }).click()
+  await expect(page.locator('canvas')).toBeVisible()
+
+  // a ação principal "Exportar" abre o seletor com as duas opções
+  await page.getByRole('button', { name: /^exportar$/i }).click()
+  await expect(page.getByRole('button', { name: /gerar imagens/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /exportar arquivo do projeto/i })).toBeVisible()
+
+  // exporta o arquivo do projeto (.postmaker.zip via download)
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: /exportar arquivo do projeto/i }).click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toMatch(/\.postmaker\.zip$/)
 
   expect(errors).toEqual([])
 })

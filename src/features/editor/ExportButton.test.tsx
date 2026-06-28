@@ -29,13 +29,19 @@ function filesFromCall(): File[] {
   return shareOrDownload.mock.calls[0]![0] as File[]
 }
 
+async function openAndChooseImages() {
+  await userEvent.click(screen.getByRole('button', { name: /exportar/i }))
+  // o seletor pergunta: gerar imagens ou exportar projeto
+  await userEvent.click(screen.getByRole('button', { name: /gerar imagens/i }))
+}
+
 describe('ExportButton', () => {
   it('exporta um post de página única como um PNG só', async () => {
     renderProjectToPngs.mockResolvedValueOnce([new Blob(['p'], { type: 'image/png' })])
     const project = createProjectFromTemplate('post-solo', { name: 'Praia' })
 
     render(<ExportButton project={project} />)
-    await userEvent.click(screen.getByRole('button', { name: /exportar/i }))
+    await openAndChooseImages()
 
     await waitFor(() => expect(shareOrDownload).toHaveBeenCalledOnce())
     const files = filesFromCall()
@@ -52,7 +58,7 @@ describe('ExportButton', () => {
     const project = createProjectFromTemplate('carousel2-diagonal', { name: 'Trip' })
 
     render(<ExportButton project={project} />)
-    await userEvent.click(screen.getByRole('button', { name: /exportar/i }))
+    await openAndChooseImages()
 
     await waitFor(() => expect(pngsToZip).toHaveBeenCalledOnce())
     const files = filesFromCall()
