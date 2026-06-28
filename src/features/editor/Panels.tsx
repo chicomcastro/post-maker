@@ -356,6 +356,20 @@ function PhotoControls({
   const update = (updater: (p: CollagePhoto) => CollagePhoto) =>
     updateCollagePhoto(pageId, photo.id, updater)
 
+  const ratio = photo.frame.width / photo.frame.height
+  const orientation = ratio < 0.95 ? 'portrait' : ratio > 1.05 ? 'landscape' : 'square'
+  const setOrientation = (kind: 'portrait' | 'square' | 'landscape') =>
+    update((p) => {
+      const long = Math.min(0.9, Math.max(0.2, Math.max(p.frame.width, p.frame.height)))
+      const dims =
+        kind === 'portrait'
+          ? { width: long * 0.8, height: long }
+          : kind === 'landscape'
+            ? { width: long, height: long * 0.8 }
+            : { width: long, height: long }
+      return { ...p, frame: { ...p.frame, ...dims } }
+    })
+
   return (
     <>
       <h3 className="panel__title">{photo.assetId ? t('editor.photo') : t('editor.emptySlot')}</h3>
@@ -369,8 +383,51 @@ function PhotoControls({
         />
       </div>
 
+      <div className="panel__group">
+        <span className="field-label">{t('editor.orientation')}</span>
+        <div className="filter-row">
+          {(['portrait', 'square', 'landscape'] as const).map((kind) => (
+            <button
+              key={kind}
+              type="button"
+              className={'chip' + (orientation === kind ? ' chip--active' : '')}
+              onClick={() => setOrientation(kind)}
+            >
+              {t(`editor.${kind}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {photo.assetId && (
         <>
+          <div className="panel__group">
+            <span className="field-label">{t('editor.framing')}</span>
+            <Slider
+              label={t('editor.zoom')}
+              value={photo.crop.scale}
+              min={1}
+              max={3}
+              step={0.05}
+              onChange={(v) => update((p) => ({ ...p, crop: { ...p.crop, scale: v } }))}
+            />
+            <Slider
+              label={t('editor.panX')}
+              value={photo.crop.x}
+              min={0}
+              max={1}
+              step={0.02}
+              onChange={(v) => update((p) => ({ ...p, crop: { ...p.crop, x: v } }))}
+            />
+            <Slider
+              label={t('editor.panY')}
+              value={photo.crop.y}
+              min={0}
+              max={1}
+              step={0.02}
+              onChange={(v) => update((p) => ({ ...p, crop: { ...p.crop, y: v } }))}
+            />
+          </div>
           <AdjustControls
             adjustments={photo.adjustments}
             onChange={(adjustments) => update((p) => ({ ...p, adjustments }))}

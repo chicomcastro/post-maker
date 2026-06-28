@@ -63,6 +63,8 @@ export function PagePreview({
               ? `${photo.style.borderWidth}px solid ${photo.style.borderColor}`
               : undefined,
           backgroundImage: url ? `url(${url})` : undefined,
+          // Enquadramento (pan) dentro do slot; o zoom fica para o editor/export.
+          backgroundPosition: `${photo.crop.x * 100}% ${photo.crop.y * 100}%`,
           ...adjustmentFilter(photo.adjustments),
         }
         return (

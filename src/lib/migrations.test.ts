@@ -45,4 +45,27 @@ describe('normalizeProject', () => {
     const { project } = distributePhotos(base, ['bg', 'a', 'b'])
     expect(normalizeProject(project)).toEqual(project)
   })
+
+  it('preenche crop padrão em fotos de colagem antigas (sem enquadramento)', () => {
+    const legacy = {
+      id: 'old2',
+      pages: [
+        {
+          id: 'pg1',
+          collage: [
+            {
+              id: 'c1',
+              assetId: 'a',
+              transform: { x: 0.5, y: 0.5, scale: 1, rotation: 0 },
+              frame: { width: 0.5, height: 0.6, cornerRadius: 0.02 },
+              style: { borderWidth: 0, borderColor: '#fff', shadow: true },
+              adjustments: { brightness: 1, contrast: 1, saturation: 1 },
+            },
+          ],
+        },
+      ],
+    }
+    const p = normalizeProject(legacy)
+    expect(p.pages[0].collage[0].crop).toEqual({ x: 0.5, y: 0.5, scale: 1 })
+  })
 })

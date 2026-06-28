@@ -169,6 +169,23 @@ test('seleciona uma foto da colagem e consegue excluí-la', async ({ page }) => 
   expect(errors).toEqual([])
 })
 
+test('muda orientação do slot e enquadra a foto', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await createTrioProject(page)
+
+  await selectCenterPhoto(page)
+  await expect(page.getByRole('heading', { name: /^foto$/i })).toBeVisible()
+
+  // controles de orientação e enquadramento aparecem
+  await expect(page.getByText(/orientação/i)).toBeVisible()
+  await page.getByRole('button', { name: /paisagem/i }).click()
+  await expect(page.getByText(/enquadrar a foto/i)).toBeVisible()
+  // ajusta o enquadramento sem erros (sliders de zoom/posição)
+  await expect(page.getByText('Posição X')).toBeVisible()
+
+  expect(errors).toEqual([])
+})
+
 test('clicar no fundo deseleciona a foto (volta ao painel de fundo)', async ({ page }) => {
   const errors = guardPageErrors(page)
   await createTrioProject(page)
