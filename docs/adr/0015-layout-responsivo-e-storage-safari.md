@@ -18,13 +18,16 @@ qualquer tela; a decisão de produto foi ter um **layout amplo** no tablet/deskt
 
 ## Decisão
 
-- **Breakpoints**:
-  - `<480px`: celular (full-bleed).
-  - `480–767px`: moldura de celular centralizada (largura fixa).
-  - `≥768px` (inclui iPad): **layout amplo** — `app-shell` até 1180px; editor em
+- **Sem "moldura"/card**: o `.app-shell` ocupa a **viewport inteira** em qualquer
+  tamanho (`position: fixed; inset: 0`) — elimina o card centralizado e qualquer
+  risco de colapso de tamanho. Mobile = app nativo full-screen; tablet/desktop =
+  web app full-screen.
+- **Breakpoints de conteúdo**:
+  - `<768px`: layout de celular (full-bleed), com cara de app nativo.
+  - `≥768px` (inclui iPad): **layout amplo** — home/criação com conteúdo
+    centralizado e legível (coluna ~820px, CTA com largura natural); editor em
     **duas colunas** (canvas + filmstrip à esquerda, painel fixo à direita, sem
-    bottom sheet); home/criação com conteúdo centralizado e legível; galeria de
-    templates com mais colunas.
+    bottom sheet); galeria de templates com mais colunas.
 - As regras do bloco `@media (min-width:768px)` ficam no **final do CSS** para
   vencer as regras-base por ordem de cascata.
 - **Storage de assets**: gravar `{ type, ArrayBuffer }` no IndexedDB (não Blob) e
