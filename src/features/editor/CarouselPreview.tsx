@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import type { Project } from '../../types/project'
 import { renderProjectToDataUrls } from '../../lib/export-render'
 import { IconButton } from '../../components/ui'
-import { Close } from '../../components/icons'
+import { Close, Share } from '../../components/icons'
+import { useProjectExport } from './useProjectExport'
 
 /**
  * Preview do carrossel como no Instagram: páginas lado a lado com scroll-snap,
@@ -14,6 +15,7 @@ export function CarouselPreview({ project, onClose }: { project: Project; onClos
   const { t } = useTranslation()
   const [urls, setUrls] = useState<string[] | null>(null)
   const [page, setPage] = useState(0)
+  const { busy, run } = useProjectExport(project)
 
   useEffect(() => {
     let alive = true
@@ -79,6 +81,11 @@ export function CarouselPreview({ project, onClose }: { project: Project; onClos
               ))}
             </div>
           )}
+          <div className="preview-actions">
+            <button className="btn btn--block" type="button" onClick={run} disabled={!!busy}>
+              <Share /> {busy ?? t('editor.exportImages')}
+            </button>
+          </div>
         </>
       ) : (
         <div className="preview-loading">{t('editor.previewRendering')}</div>

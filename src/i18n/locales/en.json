@@ -12,7 +12,9 @@
     "openProject": "Open",
     "deleteProject": "Delete",
     "pageCount_one": "{{count}} page",
-    "pageCount_other": "{{count}} pages"
+    "pageCount_other": "{{count}} pages",
+    "photoCount_one": "{{count}} photo",
+    "photoCount_other": "{{count}} photos"
   },
   "language": {
     "label": "Language",
@@ -51,6 +53,7 @@
   },
   "editor": {
     "page": "Page {{n}}",
+    "renameProject": "Rename project",
     "backHome": "Back to home",
     "undo": "Undo",
     "redo": "Redo",
@@ -90,6 +93,7 @@
     "preview": "Preview",
     "previewTitle": "Carousel preview",
     "previewRendering": "Building the preview…",
+    "exportImages": "Save / share images",
     "export": "Export",
     "exporting": "Rendering…",
     "exportProgress": "Rendering {{done}}/{{total}}…",
