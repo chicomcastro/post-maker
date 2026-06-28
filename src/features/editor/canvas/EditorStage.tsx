@@ -3,7 +3,7 @@ import { Stage, Layer, Rect, Image as KonvaImage, Transformer } from 'react-konv
 import Konva from 'konva'
 import type { Background, CollagePhoto, Page, AspectRatio } from '../../../types/project'
 import {
-  backgroundCropRect,
+  continuousBackgroundCropRect,
   coverRect,
   photoPixelRect,
   nodeToTransform,
@@ -18,6 +18,9 @@ interface EditorStageProps {
   bgColor: string
   aspectRatio: AspectRatio
   width: number
+  /** Índice da página atual e total de páginas (para o fundo contínuo). */
+  pageIndex: number
+  pageCount: number
   selectedPhotoId: string | null
   onSelect: (id: string | null) => void
   onChangePhoto: (photoId: string, updater: (p: CollagePhoto) => CollagePhoto) => void
@@ -29,6 +32,8 @@ export default function EditorStage({
   bgColor,
   aspectRatio,
   width,
+  pageIndex,
+  pageCount,
   selectedPhotoId,
   onSelect,
   onChangePhoto,
@@ -59,8 +64,20 @@ export default function EditorStage({
       }}
     >
       <Layer ref={layerRef}>
-        <Rect x={0} y={0} width={stage.width} height={stage.height} fill={bgColor} />
-        <BackgroundImage background={background} stage={stage} />
+        <Rect
+          x={0}
+          y={0}
+          width={stage.width}
+          height={stage.height}
+          fill={bgColor}
+          listening={false}
+        />
+        <BackgroundImage
+          background={background}
+          stage={stage}
+          pageIndex={pageIndex}
+          pageCount={pageCount}
+        />
         {page.collage.map((photo) => (
           <CollageImage
             key={photo.id}
@@ -82,24 +99,49 @@ export default function EditorStage({
   )
 }
 
-function BackgroundImage({ background, stage }: { background: Background; stage: Size }) {
+function BackgroundImage({
+  background,
+  stage,
+  pageIndex,
+  pageCount,
+}: {
+  background: Background
+  stage: Size
+  pageIndex: number
+  pageCount: number
+}) {
   const img = useAssetImage(background.assetId)
   const ref = useRef<Konva.Image>(null)
+  const { transform, adjustments } = background
 
+  // Re-cacheia sempre que algo do recorte muda (zoom/pan/página/ajustes), senão
+  // o nó cacheado segue mostrando o crop antigo — o bug de "não atualiza".
   useEffect(() => {
     const node = ref.current
     if (!node || !img) return
     node.cache()
     node.getLayer()?.batchDraw()
-  }, [img, background.adjustments, stage.width, stage.height])
+  }, [
+    img,
+    adjustments,
+    transform.scale,
+    transform.x,
+    transform.y,
+    pageIndex,
+    pageCount,
+    stage.width,
+    stage.height,
+  ])
 
   if (!img) return null
-  const crop = backgroundCropRect(
+  const crop = continuousBackgroundCropRect(
     { width: img.naturalWidth, height: img.naturalHeight },
     stage,
-    background.transform.scale,
-    background.transform.x - 0.5,
-    background.transform.y - 0.5,
+    transform.scale,
+    transform.x - 0.5,
+    transform.y - 0.5,
+    pageIndex,
+    pageCount,
   )
   return (
     <KonvaImage
@@ -140,12 +182,23 @@ function CollageImage({
       )
     : undefined
 
+  // Re-cacheia quando qualquer atributo visual muda (ajustes, borda, cantos,
+  // sombra, tamanho). Sem isso o nó cacheado mantém o desenho antigo.
   useEffect(() => {
     const node = ref.current
     if (!node) return
     if (img) node.cache()
     node.getLayer()?.batchDraw()
-  }, [img, photo.adjustments, rect.width, rect.height])
+  }, [
+    img,
+    photo.adjustments,
+    photo.style.borderWidth,
+    photo.style.borderColor,
+    photo.style.shadow,
+    photo.frame.cornerRadius,
+    rect.width,
+    rect.height,
+  ])
 
   const cornerPx = photo.frame.cornerRadius * Math.min(rect.width, rect.height)
 

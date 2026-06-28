@@ -168,6 +168,45 @@ test('seleciona uma foto da colagem e consegue excluí-la', async ({ page }) => 
   expect(errors).toEqual([])
 })
 
+test('clicar no fundo deseleciona a foto (volta ao painel de fundo)', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await createTrioProject(page)
+
+  await selectCenterPhoto(page)
+  await expect(page.getByRole('heading', { name: /^foto$/i })).toBeVisible()
+
+  // Clica num canto do palco (área de fundo, sem foto) => deve deselecionar.
+  const box = await page.locator('canvas').boundingBox()
+  if (box) await page.mouse.click(box.x + 6, box.y + 6)
+  await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /^foto$/i })).toHaveCount(0)
+
+  expect(errors).toEqual([])
+})
+
+test('pré-visualização do carrossel abre e desliza entre páginas', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await page.goto(APP)
+  await page.getByRole('button', { name: /criar novo/i }).click()
+  await page.getByRole('button', { name: /quadrado/i }).click()
+  await page.getByRole('button', { name: 'carousel3-diagonal' }).click()
+  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL, SMALL, SMALL, SMALL])
+  await page.getByRole('button', { name: /criar projeto/i }).click()
+  await expect(page.locator('canvas')).toBeVisible()
+
+  await page.getByRole('button', { name: /pré-visualizar/i }).click()
+  // o overlay renderiza as 3 páginas como imagens
+  const slides = page.locator('.preview-slide img')
+  await expect(slides).toHaveCount(3)
+  await expect(slides.first()).toBeVisible()
+
+  // fecha o preview
+  await page.getByRole('dialog').getByRole('button').first().click()
+  await expect(page.locator('.preview-overlay')).toHaveCount(0)
+
+  expect(errors).toEqual([])
+})
+
 test('resiliência: projeto em formato antigo não causa tela branca', async ({ page }) => {
   const errors = guardPageErrors(page)
   await page.goto(APP)

@@ -87,6 +87,9 @@
       "cool": "Frio",
       "vivid": "Vívido"
     },
+    "preview": "Pré-visualizar",
+    "previewTitle": "Pré-visualização do carrossel",
+    "previewRendering": "Montando a pré-visualização…",
     "export": "Exportar",
     "exporting": "Renderizando…",
     "exportProgress": "Renderizando {{done}}/{{total}}…",

@@ -92,6 +92,35 @@ export function backgroundCropRect(
   }
 }
 
+/**
+ * Recorte do background para UMA página de um carrossel "contínuo": a imagem
+ * cobre uma faixa virtual de `pageCount` páginas lado a lado, e cada página
+ * mostra a sua fatia horizontal. Com `pageCount = 1` é igual ao
+ * `backgroundCropRect` (post/página única). Dá a sensação de panorama contínuo
+ * ao deslizar o carrossel.
+ */
+export function continuousBackgroundCropRect(
+  natural: Size,
+  stage: Size,
+  scale: number,
+  panX: number,
+  panY: number,
+  pageIndex: number,
+  pageCount: number,
+): Rect {
+  const pages = Math.max(1, Math.floor(pageCount))
+  const index = clamp(Math.floor(pageIndex), 0, pages - 1)
+  const strip = { width: stage.width * pages, height: stage.height }
+  const full = backgroundCropRect(natural, strip, scale, panX, panY)
+  const sliceWidth = full.width / pages
+  return {
+    x: full.x + sliceWidth * index,
+    y: full.y,
+    width: sliceWidth,
+    height: full.height,
+  }
+}
+
 export function clamp(v: number, min: number, max: number): number {
   return Math.min(Math.max(v, min), max)
 }
