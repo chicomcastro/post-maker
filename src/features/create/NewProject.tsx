@@ -57,7 +57,8 @@ export function NewProject() {
       )
       await saveProject(project)
       navigate(`/editor/${project.id}`)
-    } catch {
+    } catch (err) {
+      console.error('Falha ao montar o projeto:', err)
       setBusy(null)
       setError(t('create.genericError'))
     }

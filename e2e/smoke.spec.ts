@@ -36,6 +36,23 @@ test.describe('layout em tela larga (tablet)', () => {
     expect(box!.width).toBeGreaterThan(300)
     expect(box!.height).toBeGreaterThan(300)
   })
+
+  test('editor usa duas colunas (canvas à esquerda, painel à direita)', async ({ page }) => {
+    await page.goto(APP)
+    await page.getByRole('button', { name: /criar novo/i }).click()
+    await page.getByRole('button', { name: /quadrado/i }).click()
+    await page.getByRole('button', { name: 'carousel3-diagonal' }).click()
+    await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL, SMALL, SMALL, SMALL])
+    await page.getByRole('button', { name: /criar projeto/i }).click()
+
+    await expect(page.locator('canvas')).toBeVisible()
+    const stage = await page.locator('.editor__stage').boundingBox()
+    const panel = await page.locator('.sheet').boundingBox()
+    expect(stage).not.toBeNull()
+    expect(panel).not.toBeNull()
+    // painel à direita do palco (duas colunas, não empilhado)
+    expect(panel!.x).toBeGreaterThan(stage!.x + stage!.width - 5)
+  })
 })
 
 test('alterna idioma', async ({ page }) => {

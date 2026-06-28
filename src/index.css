@@ -66,11 +66,12 @@ a {
   display: flex;
   flex-direction: column;
 }
-@media (min-width: 480px) {
+/* Telas médias (phones grandes / janelas estreitas): moldura de celular. */
+@media (min-width: 480px) and (max-width: 767px) {
   body {
     /* NÃO usar flex aqui: como .route é position:absolute, o .app-shell vira um
-       flex-item sem conteúdo em fluxo e colapsa para largura 0 (tela branca no
-       iPad/desktop). Centralizamos com margin auto + largura explícita. */
+       flex-item sem conteúdo em fluxo e colapsa para largura 0 (tela branca).
+       Centralizamos com margin auto + largura explícita. */
     padding: 24px 0;
   }
   .app-shell {
@@ -758,5 +759,69 @@ input[type='range']::-moz-range-thumb {
   * {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
+  }
+}
+
+/* ===== Tablet/desktop (iPad inclusive): layout amplo =====
+   Fica no FINAL do arquivo de propósito: precisa vir depois das regras-base
+   dos componentes (.editor etc.) para vencê-las por ordem de cascata. */
+@media (min-width: 768px) {
+  body {
+    padding: 24px 0;
+  }
+  .app-shell {
+    width: min(1180px, calc(100% - 48px));
+    max-width: none;
+    margin: 0 auto;
+    min-height: min(860px, calc(100dvh - 48px));
+    height: min(860px, calc(100dvh - 48px));
+    border-radius: 28px;
+    box-shadow: 0 30px 80px rgba(15, 20, 32, 0.28);
+  }
+
+  /* Home/criação: conteúdo centralizado e legível (não esticado). */
+  .route__scroll {
+    padding-left: max(22px, calc((100% - 760px) / 2));
+    padding-right: max(22px, calc((100% - 760px) / 2));
+  }
+
+  /* Galeria de templates aproveita mais colunas. */
+  .template-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Editor em duas colunas: canvas + tira à esquerda, painel fixo à direita. */
+  .editor {
+    display: grid;
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'bar bar'
+      'stage panel'
+      'film panel';
+  }
+  .editor > .appbar {
+    grid-area: bar;
+  }
+  .editor__stage {
+    grid-area: stage;
+    padding: 24px;
+    min-height: 0;
+  }
+  .editor > .filmstrip {
+    grid-area: film;
+  }
+  .editor > .sheet {
+    grid-area: panel;
+    max-height: none;
+    height: 100%;
+    border-radius: 0;
+    border-left: 1px solid var(--border);
+    box-shadow: none;
+    padding-top: 18px;
+  }
+  .editor > .sheet .sheet__grip {
+    display: none;
   }
 }
