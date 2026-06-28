@@ -15,6 +15,20 @@
       // bundle principal falhar ao carregar/avaliar.
       ;(function () {
         var errors = []
+
+        // O app não usa mais service worker. Remove qualquer SW remanescente de
+        // versões anteriores (sem recarregar — evita loop). Garante que ninguém
+        // fique preso num SW antigo servindo cache obsoleto.
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker
+            .getRegistrations()
+            .then(function (rs) {
+              rs.forEach(function (r) {
+                r.unregister()
+              })
+            })
+            .catch(function () {})
+        }
         function cleanupAndReload() {
           var p = []
           if ('serviceWorker' in navigator) {
