@@ -2,7 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ASPECT_RATIOS, type AspectRatio } from '../../types/project'
-import { TEMPLATES, type Template, type TemplateKind } from '../../templates/catalog'
+import {
+  TEMPLATES,
+  templateCollageCount,
+  type Template,
+  type TemplateKind,
+} from '../../templates/catalog'
 import { TemplatePreview } from '../../components/TemplatePreview'
 import { AppBar, IconButton } from '../../components/ui'
 import { ChevronLeft, ImagePlus } from '../../components/icons'
@@ -150,10 +155,17 @@ export function NewProject() {
           </section>
         )}
 
-        {step === 'photos' && (
+        {step === 'photos' && template && (
           <section className="create__step">
             <h1>{t('create.stepPhotos')}</h1>
-            <PhotoPicker files={files} onChange={setFiles} />
+            <p className="muted create__hint">
+              {t('create.photosHint', { count: templateCollageCount(template) })}
+            </p>
+            <PhotoPicker
+              files={files}
+              onChange={setFiles}
+              target={templateCollageCount(template)}
+            />
             {error && <p className="error">{error}</p>}
           </section>
         )}
@@ -170,7 +182,15 @@ export function NewProject() {
   )
 }
 
-function PhotoPicker({ files, onChange }: { files: File[]; onChange: (files: File[]) => void }) {
+function PhotoPicker({
+  files,
+  onChange,
+  target,
+}: {
+  files: File[]
+  onChange: (files: File[]) => void
+  target: number
+}) {
   const { t } = useTranslation()
   const [urls, setUrls] = useState<string[]>([])
   const [dragOver, setDragOver] = useState(false)
@@ -216,7 +236,7 @@ function PhotoPicker({ files, onChange }: { files: File[]; onChange: (files: Fil
       {files.length > 0 && (
         <>
           <p className="muted" style={{ margin: '12px 2px 0' }}>
-            {t('create.selectedCount', { count: files.length })}
+            {t('create.photosProgress', { selected: files.length, count: target })}
           </p>
           <div className="photo-grid">
             {urls.map((url, i) => (

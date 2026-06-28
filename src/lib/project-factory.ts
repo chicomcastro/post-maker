@@ -63,8 +63,14 @@ export function createProjectFromTemplate(
     templateId: template.id,
     background: makeBackground(),
     bgColor: DEFAULT_BG_COLOR,
+    assetPool: [],
     pages: template.pages.map(createPageFromArrangement),
   }
+}
+
+/** Capacidade de fotos de colagem do projeto (soma dos slots de todas as páginas). */
+export function collageCapacity(project: Project): number {
+  return project.pages.reduce((sum, page) => sum + page.collage.length, 0)
 }
 
 function defaultName(template: Template): string {
@@ -72,19 +78,16 @@ function defaultName(template: Template): string {
 }
 
 /**
- * Distribui uma lista de fotos (assetIds) pelo projeto, em ordem: a PRIMEIRA
- * foto vira o background compartilhado do carrossel; as seguintes preenchem os
- * frames de colagem, página a página. Retorna um novo projeto e o que sobrou.
+ * Distribui fotos (assetIds) pelos frames de colagem, página a página, em ordem.
+ * Guarda TODAS as fotos no `assetPool` (para escolher o background depois). O
+ * background começa vazio — é opcional e escolhido no editor. Retorna o novo
+ * projeto e os assetIds que não couberam em nenhum slot.
  */
 export function distributePhotos(
   project: Project,
   assetIds: string[],
 ): { project: Project; leftover: string[] } {
   const queue = [...assetIds]
-  const background: Background = {
-    ...project.background,
-    assetId: queue.length ? (queue.shift() ?? null) : project.background.assetId,
-  }
   const pages = project.pages.map((page) => {
     const collage = page.collage.map((photo) => ({
       ...photo,
@@ -92,5 +95,5 @@ export function distributePhotos(
     }))
     return { ...page, collage }
   })
-  return { project: { ...project, background, pages }, leftover: queue }
+  return { project: { ...project, assetPool: [...assetIds], pages }, leftover: queue }
 }

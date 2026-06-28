@@ -25,11 +25,17 @@ export interface EditorState {
   /** Background é compartilhado pelo carrossel (nível do projeto). */
   updateBackground: (updater: (bg: Background) => Background) => void
   setBgColor: (color: string) => void
+  /** Define (ou remove com null) a imagem de fundo compartilhada. */
+  setBackgroundAsset: (assetId: string | null) => void
   updateCollagePhoto: (
     pageId: string,
     photoId: string,
     updater: (photo: CollagePhoto) => CollagePhoto,
   ) => void
+  /** Atribui (ou limpa com null) a foto de um slot de colagem. */
+  setCollagePhotoAsset: (pageId: string, photoId: string, assetId: string | null) => void
+  /** Remove o slot de colagem da página. */
+  removeCollagePhoto: (pageId: string, photoId: string) => void
   bringPhotoToFront: (pageId: string, photoId: string) => void
   sendPhotoToBack: (pageId: string, photoId: string) => void
 }
@@ -122,6 +128,18 @@ export const useEditorStore = create<EditorState>()(
       setBgColor: (bgColor) =>
         set((s) => (s.project ? { project: withTimestamp({ ...s.project, bgColor }) } : s)),
 
+      setBackgroundAsset: (assetId) =>
+        set((s) =>
+          s.project
+            ? {
+                project: withTimestamp({
+                  ...s.project,
+                  background: { ...s.project.background, assetId },
+                }),
+              }
+            : s,
+        ),
+
       updateCollagePhoto: (pageId, photoId, updater) =>
         set((s) =>
           mapPage(s, pageId, (page) => ({
@@ -129,6 +147,25 @@ export const useEditorStore = create<EditorState>()(
             collage: page.collage.map((photo) => (photo.id === photoId ? updater(photo) : photo)),
           })),
         ),
+
+      setCollagePhotoAsset: (pageId, photoId, assetId) =>
+        set((s) =>
+          mapPage(s, pageId, (page) => ({
+            ...page,
+            collage: page.collage.map((photo) =>
+              photo.id === photoId ? { ...photo, assetId } : photo,
+            ),
+          })),
+        ),
+
+      removeCollagePhoto: (pageId, photoId) =>
+        set((s) => {
+          const next = mapPage(s, pageId, (page) => ({
+            ...page,
+            collage: page.collage.filter((photo) => photo.id !== photoId),
+          }))
+          return { ...next, selectedPhotoId: null }
+        }),
 
       bringPhotoToFront: (pageId, photoId) =>
         set((s) => mapPage(s, pageId, (page) => reorderPhoto(page, photoId, 'front'))),

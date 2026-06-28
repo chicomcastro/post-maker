@@ -72,7 +72,8 @@ test('fluxo completo: criar carrossel → editor → persiste → exporta', asyn
 
   await expect(page.getByRole('heading', { name: /selecione suas fotos/i })).toBeVisible()
   await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL, SMALL, SMALL, SMALL])
-  await expect(page.getByText(/7 fotos selecionadas/i)).toBeVisible()
+  // carousel3-diagonal tem 6 slots de colagem; progresso mostra 7/6
+  await expect(page.getByText('7/6 fotos')).toBeVisible()
 
   await page.getByRole('button', { name: /criar projeto/i }).click()
 
@@ -112,6 +113,59 @@ test('seleciona uma foto da colagem e abre o painel da foto', async ({ page }) =
   const box = await page.locator('canvas').boundingBox()
   if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
   await expect(page.getByRole('heading', { name: /^foto$/i })).toBeVisible()
+})
+
+// Helper: cria um projeto post-trio-scatter (3 slots) com 4 fotos e entra no editor.
+async function createTrioProject(page: Page) {
+  await page.goto(APP)
+  await page.getByRole('button', { name: /criar novo/i }).click()
+  await page.getByRole('button', { name: /quadrado/i }).click()
+  await page.getByRole('button', { name: 'post-trio-scatter' }).click()
+  // o passo de fotos indica quantas o layout usa
+  await expect(page.getByText(/este layout usa 3 fotos/i)).toBeVisible()
+  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL])
+  await expect(page.getByText('4/3 fotos')).toBeVisible()
+  await page.getByRole('button', { name: /criar projeto/i }).click()
+  await expect(page.locator('canvas')).toBeVisible()
+}
+
+async function selectCenterPhoto(page: Page) {
+  const box = await page.locator('canvas').boundingBox()
+  if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+}
+
+test('background começa vazio e pode ser escolhido entre as fotos', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await createTrioProject(page)
+
+  // Sem foto selecionada => painel de fundo. Background começa vazio: paleta de cores visível.
+  await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
+  await expect(page.getByText(/imagem de fundo/i)).toBeVisible()
+
+  // Escolhe a 1ª miniatura como imagem de fundo => aparecem zoom e "remover fundo".
+  await page.locator('.thumbs .thumb').nth(1).click()
+  await expect(page.getByText(/^zoom$/i)).toBeVisible()
+  await expect(page.getByRole('button', { name: /remover fundo/i })).toBeVisible()
+
+  // Remove o fundo => volta para a paleta de cores.
+  await page.getByRole('button', { name: /remover fundo/i }).click()
+  await expect(page.getByRole('button', { name: /remover fundo/i })).toHaveCount(0)
+
+  expect(errors).toEqual([])
+})
+
+test('seleciona uma foto da colagem e consegue excluí-la', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await createTrioProject(page)
+
+  await selectCenterPhoto(page)
+  await expect(page.getByRole('heading', { name: /^foto$/i })).toBeVisible()
+
+  // Excluir foto fecha o painel da foto (volta ao painel de fundo).
+  await page.getByRole('button', { name: /excluir foto/i }).click()
+  await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
+
+  expect(errors).toEqual([])
 })
 
 test('resiliência: projeto em formato antigo não causa tela branca', async ({ page }) => {

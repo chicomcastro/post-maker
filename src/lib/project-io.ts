@@ -38,6 +38,7 @@ function mimeForPath(path: string): string {
 /** Coleta todos os assetIds referenciados por um projeto. */
 export function collectAssetIds(project: Project): string[] {
   const ids = new Set<string>()
+  for (const id of project.assetPool) ids.add(id)
   if (project.background.assetId) ids.add(project.background.assetId)
   for (const page of project.pages) {
     for (const photo of page.collage) {

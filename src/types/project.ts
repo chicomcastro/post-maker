@@ -94,6 +94,8 @@ export interface Project {
   background: Background
   /** Cor de fundo visível quando o background não cobre a página. */
   bgColor: string
+  /** Todas as fotos importadas (ids), disponíveis para colagem e background. */
+  assetPool: string[]
   pages: Page[]
 }
 
