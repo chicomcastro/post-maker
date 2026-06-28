@@ -22,6 +22,7 @@ export function EditorPage() {
   const project = useEditorStore((s) => s.project)
   const currentPageIndex = useEditorStore((s) => s.currentPageIndex)
   const selectedPhotoId = useEditorStore((s) => s.selectedPhotoId)
+  const interactionMode = useEditorStore((s) => s.interactionMode)
   const setProject = useEditorStore((s) => s.setProject)
   const selectPhoto = useEditorStore((s) => s.selectPhoto)
   const updateCollagePhoto = useEditorStore((s) => s.updateCollagePhoto)
@@ -153,6 +154,7 @@ export function EditorPage() {
               width={stageWidth}
               pageIndex={currentPageIndex}
               pageCount={project.pages.length}
+              interactionMode={interactionMode}
               selectedPhotoId={selectedPhotoId}
               onSelect={selectPhoto}
               onChangePhoto={(photoId, updater) => updateCollagePhoto(page.id, photoId, updater)}

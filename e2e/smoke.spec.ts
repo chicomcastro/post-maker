@@ -183,6 +183,19 @@ test('muda orientação do slot e enquadra a foto', async ({ page }) => {
   // ajusta o enquadramento sem erros (sliders de zoom/posição)
   await expect(page.getByText('Posição X')).toBeVisible()
 
+  // seletor de arraste: começa em "Enquadrar"; arrastar a foto reenquadra sem erro
+  await expect(page.getByText(/ao arrastar a foto/i)).toBeVisible()
+  await expect(page.getByRole('button', { name: /^enquadrar$/i })).toBeVisible()
+  const cbox = await page.locator('canvas').boundingBox()
+  if (cbox) {
+    await page.mouse.move(cbox.x + cbox.width / 2, cbox.y + cbox.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(cbox.x + cbox.width / 2 + 40, cbox.y + cbox.height / 2 + 20, { steps: 5 })
+    await page.mouse.up()
+  }
+  // alterna para "Mover slot"
+  await page.getByRole('button', { name: /mover slot/i }).click()
+
   expect(errors).toEqual([])
 })
 

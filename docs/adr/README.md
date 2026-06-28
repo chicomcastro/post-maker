@@ -28,3 +28,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0019](0019-exportar-acao-principal-home-minimalista.md)  | Exportar como ação principal e home minimalista       | Aceito |
 | [0020](0020-exportar-imagens-direto-e-performance.md)     | Exportar imagens direto (sem zip) e performance       | Aceito |
 | [0021](0021-orientacao-de-slot-e-enquadramento.md)        | Orientação do slot e enquadramento da foto            | Aceito |
+| [0022](0022-arrastar-para-enquadrar.md)                   | Arrastar a foto para enquadrar (vs mover o slot)      | Aceito |

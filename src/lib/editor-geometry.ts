@@ -121,6 +121,23 @@ export function continuousBackgroundCropRect(
   }
 }
 
+/**
+ * Aplica um deslocamento (em frações do slot) ao enquadramento da foto, ao
+ * arrastar dentro do slot. Arrastar a imagem para a direita revela o conteúdo à
+ * esquerda, então o recorte anda no sentido oposto. Resultado clampado a [0,1].
+ */
+export function panCrop(
+  crop: { x: number; y: number; scale: number },
+  dxFraction: number,
+  dyFraction: number,
+): { x: number; y: number; scale: number } {
+  return {
+    ...crop,
+    x: clamp(crop.x - dxFraction, 0, 1),
+    y: clamp(crop.y - dyFraction, 0, 1),
+  }
+}
+
 export function clamp(v: number, min: number, max: number): number {
   return Math.min(Math.max(v, min), max)
 }

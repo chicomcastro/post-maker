@@ -4,17 +4,23 @@ import type { Background, CollagePhoto, AspectRatio, Page, Project } from '../ty
 import { createPageFromArrangement } from '../lib/project-factory'
 import { createId } from '../lib/id'
 
+/** O que o arraste sobre a foto faz: enquadrar (pan do crop) ou mover o slot. */
+export type InteractionMode = 'frame' | 'move'
+
 export interface EditorState {
   project: Project | null
   currentPageIndex: number
   /** Foto de colagem selecionada no editor (não faz parte do histórico). */
   selectedPhotoId: string | null
+  /** Modo de arraste sobre a foto (não faz parte do histórico). */
+  interactionMode: InteractionMode
 
   setProject: (project: Project | null) => void
   rename: (name: string) => void
   setAspectRatio: (aspect: AspectRatio) => void
   setCurrentPage: (index: number) => void
   selectPhoto: (photoId: string | null) => void
+  setInteractionMode: (mode: InteractionMode) => void
 
   updatePage: (pageId: string, updater: (page: Page) => Page) => void
   addPage: (arrangementId?: string) => void
@@ -52,10 +58,13 @@ export const useEditorStore = create<EditorState>()(
       project: null,
       currentPageIndex: 0,
       selectedPhotoId: null,
+      interactionMode: 'frame',
 
       setProject: (project) => set({ project, currentPageIndex: 0, selectedPhotoId: null }),
 
       selectPhoto: (selectedPhotoId) => set({ selectedPhotoId }),
+
+      setInteractionMode: (interactionMode) => set({ interactionMode }),
 
       rename: (name) =>
         set((s) => (s.project ? { project: withTimestamp({ ...s.project, name }) } : s)),

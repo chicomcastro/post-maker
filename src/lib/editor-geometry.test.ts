@@ -6,6 +6,7 @@ import {
   coverRect,
   backgroundCropRect,
   continuousBackgroundCropRect,
+  panCrop,
   clamp,
 } from './editor-geometry'
 import { createProjectFromTemplate } from './project-factory'
@@ -100,6 +101,18 @@ describe('editor-geometry', () => {
     const last = continuousBackgroundCropRect(natural, stage, 1, 0, 0, 1, 2)
     const tooFar = continuousBackgroundCropRect(natural, stage, 1, 0, 0, 9, 2)
     expect(tooFar).toEqual(last)
+  })
+
+  it('panCrop desloca no sentido oposto ao arraste e clampa em [0,1]', () => {
+    const base = { x: 0.5, y: 0.5, scale: 1 }
+    // arrastar a foto para a direita (dx>0) move o recorte para a esquerda
+    expect(panCrop(base, 0.2, 0).x).toBeCloseTo(0.3)
+    expect(panCrop(base, 0, 0.2).y).toBeCloseTo(0.3)
+    // clamp nos limites
+    expect(panCrop(base, -1, 0).x).toBe(1)
+    expect(panCrop(base, 2, 0).x).toBe(0)
+    // preserva o zoom
+    expect(panCrop({ x: 0.5, y: 0.5, scale: 2 }, 0.1, 0).scale).toBe(2)
   })
 
   it('clamp limita o valor', () => {

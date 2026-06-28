@@ -4,11 +4,13 @@ import Konva from 'konva'
 import type { Background, CollagePhoto, Page, AspectRatio } from '../../../types/project'
 import {
   continuousBackgroundCropRect,
+  panCrop,
   photoPixelRect,
   nodeToTransform,
   stageSizeFor,
   type Size,
 } from '../../../lib/editor-geometry'
+import type { InteractionMode } from '../../../store/editorStore'
 import { useAssetImage } from './useAssetImage'
 
 interface EditorStageProps {
@@ -20,6 +22,8 @@ interface EditorStageProps {
   /** Índice da página atual e total de páginas (para o fundo contínuo). */
   pageIndex: number
   pageCount: number
+  /** Arrastar a foto: enquadra (pan do crop) ou move o slot. */
+  interactionMode: InteractionMode
   selectedPhotoId: string | null
   onSelect: (id: string | null) => void
   onChangePhoto: (photoId: string, updater: (p: CollagePhoto) => CollagePhoto) => void
@@ -33,6 +37,7 @@ export default function EditorStage({
   width,
   pageIndex,
   pageCount,
+  interactionMode,
   selectedPhotoId,
   onSelect,
   onChangePhoto,
@@ -82,6 +87,7 @@ export default function EditorStage({
             key={photo.id}
             photo={photo}
             stage={stage}
+            interactionMode={interactionMode}
             onSelect={() => onSelect(photo.id)}
             onChange={(updater) => onChangePhoto(photo.id, updater)}
           />
@@ -163,11 +169,13 @@ function BackgroundImage({
 function CollageImage({
   photo,
   stage,
+  interactionMode,
   onSelect,
   onChange,
 }: {
   photo: CollagePhoto
   stage: Size
+  interactionMode: InteractionMode
   onSelect: () => void
   onChange: (updater: (p: CollagePhoto) => CollagePhoto) => void
 }) {
@@ -211,6 +219,11 @@ function CollageImage({
 
   const cornerPx = photo.frame.cornerRadius * Math.min(rect.width, rect.height)
 
+  // Arrastar a foto = enquadrar (só quando há imagem). Mantemos o nó fixo via
+  // dragBoundFunc e convertemos o movimento do ponteiro em pan do recorte.
+  const framing = interactionMode === 'frame' && !!photo.assetId
+  const frameDrag = useRef<{ last: { x: number; y: number } } | null>(null)
+
   return (
     <KonvaImage
       ref={ref}
@@ -243,7 +256,37 @@ function CollageImage({
       draggable
       onClick={onSelect}
       onTap={onSelect}
+      dragBoundFunc={
+        framing
+          ? (pos) => {
+              const st = frameDrag.current
+              if (!st) {
+                frameDrag.current = { last: pos }
+                return { x: rect.x, y: rect.y }
+              }
+              const dx = pos.x - st.last.x
+              const dy = pos.y - st.last.y
+              st.last = pos
+              // Converte o movimento (em px do palco) para os eixos da foto,
+              // desfazendo a rotação do slot, e normaliza pelo tamanho exibido.
+              const rad = (-photo.transform.rotation * Math.PI) / 180
+              const rx = dx * Math.cos(rad) - dy * Math.sin(rad)
+              const ry = dx * Math.sin(rad) + dy * Math.cos(rad)
+              const denom = photo.transform.scale || 1
+              onChange((p) => ({
+                ...p,
+                crop: panCrop(p.crop, rx / (rect.width * denom), ry / (rect.height * denom)),
+              }))
+              return { x: rect.x, y: rect.y }
+            }
+          : undefined
+      }
       onDragEnd={(e) => {
+        if (framing) {
+          frameDrag.current = null
+          e.target.position({ x: rect.x, y: rect.y })
+          return
+        }
         const t = nodeToTransform(
           {
             x: e.target.x(),
