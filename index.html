@@ -78,22 +78,30 @@
         })
 
         // Se o app não montar em alguns segundos, mostra o erro (em vez de branco).
+        // Dispara por timer próprio — não depende de 'load' (que pode não ocorrer).
+        var shown = false
+        function showDiagnostic() {
+          if (shown) return
+          var root = document.getElementById('root')
+          if (!root || root.childElementCount > 0) return
+          shown = true
+          var detail =
+            (errors.join('\n') || 'O app não chegou a executar (sem erro de JS capturado).') +
+            '\n\nNavegador: ' +
+            navigator.userAgent
+          detail = detail.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          root.innerHTML =
+            '<div style="font-family:system-ui,-apple-system,sans-serif;padding:28px 20px;max-width:520px;margin:0 auto;text-align:center">' +
+            '<h1 style="font-size:1.3rem;margin:0 0 8px">Não foi possível abrir o app</h1>' +
+            '<p style="color:#6b7280;margin:0 0 14px">Toque para limpar o cache e recarregar. Se persistir, mande um print deste texto.</p>' +
+            '<button onclick="window.__pmCleanup()" style="padding:13px 22px;border:none;border-radius:999px;background:#f97316;color:#fff;font-weight:600;font-size:1rem">Limpar cache e recarregar</button>' +
+            '<pre style="white-space:pre-wrap;text-align:left;background:#f4f4f5;color:#111;padding:12px;border-radius:10px;font-size:12px;margin-top:18px;overflow:auto">' +
+            detail +
+            '</pre></div>'
+        }
+        setTimeout(showDiagnostic, 5000)
         window.addEventListener('load', function () {
-          setTimeout(function () {
-            var root = document.getElementById('root')
-            if (!root || root.childElementCount > 0) return
-            var detail = (errors.join('\n') || 'Nenhum erro capturado (possível cache antigo).')
-              .replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-            root.innerHTML =
-              '<div style="font-family:system-ui,-apple-system,sans-serif;padding:28px 20px;max-width:520px;margin:0 auto;text-align:center">' +
-              '<h1 style="font-size:1.3rem;margin:0 0 8px">Não foi possível abrir o app</h1>' +
-              '<p style="color:#6b7280;margin:0 0 14px">Toque para limpar o cache e recarregar. Se persistir, mande o detalhe abaixo.</p>' +
-              '<button onclick="window.__pmCleanup()" style="padding:13px 22px;border:none;border-radius:999px;background:#f97316;color:#fff;font-weight:600;font-size:1rem">Limpar cache e recarregar</button>' +
-              '<pre style="white-space:pre-wrap;text-align:left;background:#f4f4f5;color:#111;padding:12px;border-radius:10px;font-size:12px;margin-top:18px;overflow:auto">' +
-              detail +
-              '</pre></div>'
-          }, 4000)
+          setTimeout(showDiagnostic, 4000)
         })
       })()
     </script>
