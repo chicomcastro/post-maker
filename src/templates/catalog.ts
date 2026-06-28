@@ -23,6 +23,16 @@ export const TEMPLATES: Template[] = [
   { id: 'post-trio-fan', kind: 'post', pages: ['A9'], preferredAspect: '1:1' },
   { id: 'post-corner', kind: 'post', pages: ['A7'], preferredAspect: '9:16' },
 
+  // Carrosséis "uma foto por página" (mesmo arranjo em todas as páginas)
+  { id: 'carousel2-solo', kind: 'carousel', pages: ['A1', 'A1'], preferredAspect: '4:5' },
+  { id: 'carousel3-solo', kind: 'carousel', pages: ['A1', 'A1', 'A1'], preferredAspect: '4:5' },
+  {
+    id: 'carousel4-solo',
+    kind: 'carousel',
+    pages: ['A1', 'A1', 'A1', 'A1'],
+    preferredAspect: '4:5',
+  },
+
   // Carrosséis de 2 páginas
   { id: 'carousel2-solo-duo', kind: 'carousel', pages: ['A1', 'A2'], preferredAspect: '4:5' },
   { id: 'carousel2-diagonal', kind: 'carousel', pages: ['A3', 'A3'], preferredAspect: '4:5' },

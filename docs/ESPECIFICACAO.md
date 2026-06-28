@@ -115,7 +115,7 @@ Suporte a JPG, PNG, WebP e **HEIC** (via conversão client-side; ver RF-12).
 **RF-02 — Galeria de templates.** Templates são **presets de post (1 página) ou
 carrossel (2–4 páginas)**, parametrizados por: nº de páginas, nº de fotos de
 colagem por página (1–3), arranjo (posição/ângulo) e proporção. O conjunto
-inicial tem **25 templates** sobre 9 arranjos reutilizáveis — ver
+inicial tem **28 templates** sobre 9 arranjos reutilizáveis — ver
 [`TEMPLATES.md`](TEMPLATES.md).
 
 **RF-03 — Auto-distribuição.** Ao escolher template e fotos, distribuir na
@@ -320,7 +320,7 @@ interface Template {
 
 ## 10. Decisões tomadas
 
-- ✅ Conjunto inicial: **25 templates** — posts de 1 página + carrosséis de 2–4
+- ✅ Conjunto inicial: **28 templates** — posts de 1 página + carrosséis de 2–4
   páginas; cada página com background + 1–3 fotos de colagem em posições/ângulos
   variados. Catálogo nominal em [`TEMPLATES.md`](TEMPLATES.md).
 - ✅ Templates **pré-prontos e customizáveis** (mover/inclinar/redimensionar).

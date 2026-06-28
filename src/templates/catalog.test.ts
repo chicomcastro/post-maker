@@ -20,10 +20,17 @@ describe('arranjos', () => {
 })
 
 describe('catálogo de templates', () => {
-  it('tem 25 templates com ids únicos', () => {
-    expect(TEMPLATES).toHaveLength(25)
+  it('tem 28 templates com ids únicos', () => {
+    expect(TEMPLATES).toHaveLength(28)
     const ids = new Set(TEMPLATES.map((t) => t.id))
-    expect(ids.size).toBe(25)
+    expect(ids.size).toBe(28)
+  })
+
+  it('inclui carrosséis "uma foto por página" (mesmo arranjo em todas)', () => {
+    for (const id of ['carousel2-solo', 'carousel3-solo', 'carousel4-solo']) {
+      const t = getTemplate(id)
+      expect(t.pages.every((arr) => arr === 'A1')).toBe(true)
+    }
   })
 
   it('todo template referencia arranjos válidos e respeita 1–4 páginas', () => {

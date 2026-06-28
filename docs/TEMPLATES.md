@@ -57,13 +57,14 @@ Para quem quer um único post de feed (não carrossel).
 
 | ID                   | Páginas (arranjos) | Fotos/pág. | Proporção | Vibe                        |
 | -------------------- | ------------------ | :--------: | :-------: | --------------------------- |
+| `carousel2-solo`     | A1 → A1            |    1, 1    |    4:5    | Uma foto por página, limpo. |
 | `carousel2-solo-duo` | A1 → A2            |    1, 2    |    4:5    | Abre com destaque, expande. |
 | `carousel2-diagonal` | A3 → A3            |    2, 2    |    4:5    | Ritmo diagonal consistente. |
 | `carousel2-duo-trio` | A2 → A5            |    2, 3    |    1:1    | Cresce em densidade.        |
 | `carousel2-fan`      | A9 → A9            |    3, 3    |    1:1    | Lúdico do começo ao fim.    |
 | `carousel2-vertical` | A6 → A6            |    3, 3    |   9:16    | Stories/coluna.             |
 
-**5 templates.**
+**6 templates.**
 
 ---
 
@@ -71,6 +72,7 @@ Para quem quer um único post de feed (não carrossel).
 
 | ID                    | Páginas (arranjos) | Fotos/pág. | Proporção | Vibe                                    |
 | --------------------- | ------------------ | :--------: | :-------: | --------------------------------------- |
+| `carousel3-solo`      | A1 → A1 → A1       |  1, 1, 1   |    4:5    | Uma foto por página, minimal.           |
 | `carousel3-crescendo` | A1 → A2 → A5       |  1, 2, 3   |    4:5    | Crescente: capa → dupla → trio.         |
 | `carousel3-diagonal`  | A3 → A3 → A3       |  2, 2, 2   |    4:5    | Coeso e dinâmico.                       |
 | `carousel3-scatter`   | A5 → A5 → A5       |  3, 3, 3   |    1:1    | Álbum espalhado.                        |
@@ -80,7 +82,7 @@ Para quem quer um único post de feed (não carrossel).
 | `carousel3-side`      | A8 → A8 → A8       |  2, 2, 2   |    4:5    | Faixa lateral, espaço pra texto futuro. |
 | `carousel3-corner`    | A7 → A1 → A7       |  3, 1, 3   |   9:16    | Cluster, respiro, cluster.              |
 
-**8 templates.**
+**9 templates.**
 
 ---
 
@@ -88,6 +90,7 @@ Para quem quer um único post de feed (não carrossel).
 
 | ID                    | Páginas (arranjos) | Fotos/pág. | Proporção | Vibe                            |
 | --------------------- | ------------------ | :--------: | :-------: | ------------------------------- |
+| `carousel4-solo`      | A1 → A1 → A1 → A1  |    1×4     |    4:5    | Uma foto por página, minimal.   |
 | `carousel4-crescendo` | A1 → A2 → A5 → A7  | 1, 2, 3, 3 |    4:5    | Abre simples, fecha cheio.      |
 | `carousel4-diagonal`  | A3 → A3 → A3 → A3  |    2×4     |    4:5    | Consistente e dinâmico.         |
 | `carousel4-scatter`   | A5 → A5 → A5 → A5  |    3×4     |    1:1    | Álbum de viagem completo.       |
@@ -95,13 +98,13 @@ Para quem quer um único post de feed (não carrossel).
 | `carousel4-mix`       | A2 → A5 → A8 → A9  | 2, 3, 2, 3 |    4:5    | Variado, "editorial".           |
 | `carousel4-bookend`   | A1 → A5 → A5 → A1  | 1, 3, 3, 1 |    1:1    | Capa e contracapa minimalistas. |
 
-**6 templates.**
+**7 templates.**
 
 ---
 
 ## Total
 
-**6 (posts) + 5 + 8 + 6 = 25 templates** no conjunto inicial — dentro da faixa
+**6 (posts) + 6 + 9 + 7 = 28 templates** no conjunto inicial — dentro da faixa
 de 20–30. Como todos compartilham 9 arranjos parametrizados, dá para gerar mais
 variações trocando proporção, cor de fundo e estilo de borda sem novo código.
 
