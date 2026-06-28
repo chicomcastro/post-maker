@@ -10,8 +10,16 @@ interface PostMakerDB extends DBSchema {
   }
   assets: {
     key: string
-    value: Blob
+    // Guardamos ArrayBuffer + tipo (não Blob direto): o Safari/WebKit falha ao
+    // armazenar Blob/File no IndexedDB ("Error preparing Blob/File data...").
+    // Blob antigo (de versões anteriores) é tolerado na leitura.
+    value: StoredAsset | Blob
   }
+}
+
+interface StoredAsset {
+  type: string
+  buffer: ArrayBuffer
 }
 
 const DB_NAME = 'post-maker'
@@ -62,12 +70,18 @@ export async function deleteProject(id: string): Promise<void> {
 
 export async function putAsset(id: string, blob: Blob): Promise<void> {
   const db = await getDB()
-  await db.put('assets', blob, id)
+  // Converte para ArrayBuffer antes de gravar (compatível com Safari/WebKit).
+  const buffer = await blob.arrayBuffer()
+  const stored: StoredAsset = { type: blob.type, buffer }
+  await db.put('assets', stored, id)
 }
 
 export async function getAsset(id: string): Promise<Blob | undefined> {
   const db = await getDB()
-  return db.get('assets', id)
+  const stored = await db.get('assets', id)
+  if (!stored) return undefined
+  if (stored instanceof Blob) return stored // dados de versões anteriores
+  return new Blob([stored.buffer], { type: stored.type })
 }
 
 export async function deleteAsset(id: string): Promise<void> {
