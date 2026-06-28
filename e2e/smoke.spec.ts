@@ -24,17 +24,18 @@ test('home carrega sem erros', async ({ page }) => {
 })
 
 // Regressão: em telas largas (iPad/desktop, >=480px) o .app-shell colapsava
-// para largura 0 (tela branca). Garante que a moldura tem largura e o conteúdo
-// aparece em viewport de tablet.
+// para largura 0 (tela branca). Garante que o app ocupa a tela toda e o
+// conteúdo aparece em viewport de tablet.
 test.describe('layout em tela larga (tablet)', () => {
   test.use({ viewport: { width: 834, height: 1180 } })
-  test('renderiza a moldura e o conteúdo no iPad', async ({ page }) => {
+  test('ocupa a tela inteira e mostra o conteúdo no iPad', async ({ page }) => {
     await page.goto(APP)
     await expect(page.getByRole('button', { name: /criar novo/i })).toBeVisible()
     const box = await page.locator('.app-shell').boundingBox()
     expect(box).not.toBeNull()
-    expect(box!.width).toBeGreaterThan(300)
-    expect(box!.height).toBeGreaterThan(300)
+    // full-screen: app-shell preenche ~toda a viewport (834x1180)
+    expect(box!.width).toBeGreaterThan(800)
+    expect(box!.height).toBeGreaterThan(1100)
   })
 
   test('editor usa duas colunas (canvas à esquerda, painel à direita)', async ({ page }) => {
