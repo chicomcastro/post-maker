@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { AppBar } from '../components/ui'
 import { Plus } from '../components/icons'
-import { listProjects, deleteProject } from '../lib/storage'
+import { listProjects, deleteProject, saveProject } from '../lib/storage'
 import type { Project } from '../types/project'
 import { ProjectCard } from './ProjectCard'
 
@@ -22,32 +22,41 @@ export function Home() {
     setProjects((prev) => prev.filter((p) => p.id !== id))
   }
 
+  async function rename(project: Project, name: string) {
+    const updated = { ...project, name, updatedAt: Date.now() }
+    await saveProject(updated)
+    setProjects((prev) => prev.map((p) => (p.id === project.id ? updated : p)))
+  }
+
   return (
     <>
       <AppBar title={t('app.name')} right={<LanguageSwitcher />} />
       <div className="route__scroll">
-        <section className="hero">
-          <h1>{t('app.tagline')}</h1>
-          <p>{t('home.subtitle')}</p>
-          <button className="btn btn--block" type="button" onClick={() => navigate('/new')}>
-            <Plus /> {t('home.create')}
-          </button>
-        </section>
+        <button
+          className="btn btn--block home-create"
+          type="button"
+          onClick={() => navigate('/new')}
+        >
+          <Plus /> {t('home.create')}
+        </button>
 
-        <h2 className="section-title">{t('home.yourProjects')}</h2>
         {projects.length === 0 ? (
           <p className="empty">{t('home.noProjects')}</p>
         ) : (
-          <ul className="project-list">
-            {projects.map((p) => (
-              <ProjectCard
-                key={p.id}
-                project={p}
-                onOpen={() => navigate(`/editor/${p.id}`)}
-                onDelete={() => remove(p.id)}
-              />
-            ))}
-          </ul>
+          <>
+            <h2 className="section-title">{t('home.yourProjects')}</h2>
+            <ul className="project-list">
+              {projects.map((p) => (
+                <ProjectCard
+                  key={p.id}
+                  project={p}
+                  onOpen={() => navigate(`/editor/${p.id}`)}
+                  onDelete={() => remove(p.id)}
+                  onRename={(name) => rename(p, name)}
+                />
+              ))}
+            </ul>
+          </>
         )}
       </div>
     </>

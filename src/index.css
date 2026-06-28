@@ -219,6 +219,89 @@ a {
   padding: 0.55rem 0.9rem;
   font-size: 0.9rem;
 }
+/* Ação principal "Exportar" na barra do editor (compacta mas em destaque). */
+.export-cta {
+  padding: 0.5rem 0.95rem;
+  font-size: 0.92rem;
+}
+.export-cta svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== Action sheet (escolha de exportação) ===== */
+.action-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: preview-in 0.18s ease;
+}
+.action-sheet__panel {
+  width: 100%;
+  max-width: 520px;
+  background: var(--bg);
+  border-top-left-radius: 22px;
+  border-top-right-radius: 22px;
+  padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
+}
+@media (min-width: 768px) {
+  .action-sheet {
+    align-items: center;
+  }
+  .action-sheet__panel {
+    border-radius: 22px;
+  }
+}
+.action-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0 10px;
+}
+.action-sheet__head h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.action-sheet__option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  margin-top: 10px;
+  transition: transform 0.08s ease;
+}
+.action-sheet__option:active {
+  transform: scale(0.98);
+}
+.action-sheet__option svg {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+.action-sheet__option span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.action-sheet__option strong {
+  font-weight: 650;
+}
+.action-sheet__option small {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
 .btn svg {
   width: 20px;
   height: 20px;
@@ -261,6 +344,12 @@ a {
 .hero p {
   color: var(--muted);
   margin: 0 0 1.1rem;
+}
+/* CTA principal da home: criar novo projeto. */
+.home-create {
+  margin: 14px 0 22px;
+  font-size: 1.05rem;
+  padding: 1rem;
 }
 .section-title {
   font-size: 0.82rem;
@@ -313,6 +402,30 @@ a {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+.project-card__rename {
+  font: inherit;
+  font-weight: 650;
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px 6px;
+  outline: 2px solid var(--accent);
+}
+.project-card__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
 }
 .project-card__meta {
   font-size: 0.85rem;
@@ -997,7 +1110,8 @@ input[type='range']::-moz-range-thumb {
   }
 
   /* CTA com largura natural (não esticado de ponta a ponta) no desktop. */
-  .hero .btn--block {
+  .hero .btn--block,
+  .home-create {
     width: auto;
     padding-left: 2.2rem;
     padding-right: 2.2rem;

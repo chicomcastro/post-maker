@@ -18,9 +18,11 @@ function makeProject() {
   return project
 }
 
+const noop = () => {}
+
 describe('ProjectCard', () => {
   it('mostra nome, data, template e nº de fotos', () => {
-    render(<ProjectCard project={makeProject()} onOpen={() => {}} onDelete={() => {}} />)
+    render(<ProjectCard project={makeProject()} onOpen={noop} onDelete={noop} onRename={noop} />)
     expect(screen.getByText('Viagem ao Norte')).toBeInTheDocument()
     expect(screen.getByText('carousel3-solo')).toBeInTheDocument()
     expect(screen.getByText(/4 fotos/)).toBeInTheDocument()
@@ -31,10 +33,24 @@ describe('ProjectCard', () => {
   it('dispara abrir e excluir', async () => {
     const onOpen = vi.fn()
     const onDelete = vi.fn()
-    render(<ProjectCard project={makeProject()} onOpen={onOpen} onDelete={onDelete} />)
+    render(
+      <ProjectCard project={makeProject()} onOpen={onOpen} onDelete={onDelete} onRename={noop} />,
+    )
     await userEvent.click(screen.getByRole('button', { name: /abrir/i }))
     expect(onOpen).toHaveBeenCalled()
     await userEvent.click(screen.getByRole('button', { name: /apagar/i }))
     expect(onDelete).toHaveBeenCalled()
+  })
+
+  it('renomeia inline pelo lápis', async () => {
+    const onRename = vi.fn()
+    render(
+      <ProjectCard project={makeProject()} onOpen={noop} onDelete={noop} onRename={onRename} />,
+    )
+    await userEvent.click(screen.getByRole('button', { name: /renomear projeto/i }))
+    const input = screen.getByRole('textbox', { name: /renomear projeto/i })
+    await userEvent.clear(input)
+    await userEvent.type(input, 'Outro nome{Enter}')
+    expect(onRename).toHaveBeenCalledWith('Outro nome')
   })
 })

@@ -8,18 +8,24 @@ import {
   blobToFile,
   slideFileName,
   zipFileName,
+  projectFileName,
 } from '../../lib/export'
+import { collectAssetIds, exportProjectZip } from '../../lib/project-io'
+import { getAsset } from '../../lib/storage'
 
 /**
- * Lógica de exportação/compartilhamento das imagens finais (PNG por página;
- * .zip quando há mais de uma). Compartilhada pelo botão da barra e pelo CTA do
- * preview. `busy` é o rótulo de progresso (null = ocioso).
+ * Exportação do projeto, em dois modos:
+ *  - `exportImages`: gera os PNGs finais (um por página; .zip se houver vários)
+ *    para postar na rede — usa Web Share no mobile e download no desktop.
+ *  - `exportProject`: empacota o projeto + fotos num .zip (backup/transferência,
+ *    reimportável depois).
+ * `busy` é o rótulo de progresso (null = ocioso).
  */
 export function useProjectExport(project: Project) {
   const { t } = useTranslation()
   const [busy, setBusy] = useState<string | null>(null)
 
-  async function run() {
+  async function exportImages() {
     if (busy) return
     setBusy(t('editor.exporting'))
     try {
@@ -40,5 +46,26 @@ export function useProjectExport(project: Project) {
     }
   }
 
-  return { busy, run }
+  async function exportProject() {
+    if (busy) return
+    setBusy(t('editor.exportingProject'))
+    try {
+      const ids = collectAssetIds(project)
+      const assets = new Map<string, Blob>()
+      await Promise.all(
+        ids.map(async (id) => {
+          const blob = await getAsset(id)
+          if (blob) assets.set(id, blob)
+        }),
+      )
+      const zip = await exportProjectZip(project, assets)
+      await shareOrDownload([blobToFile(zip, projectFileName(project.name))])
+    } catch {
+      window.alert(t('editor.exportError'))
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  return { busy, exportImages, exportProject }
 }
