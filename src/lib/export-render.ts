@@ -6,7 +6,7 @@ import { ASPECT_DIMENSIONS, type Adjustments, type Page, type Project } from '..
 import { getAsset } from './storage'
 import {
   adjustmentsToFilter,
-  backgroundCropRect,
+  continuousBackgroundCropRect,
   coverRect,
   photoPixelRect,
   stageSizeFor,
@@ -69,6 +69,7 @@ export function renderPage(
   page: Page,
   project: Project,
   images: Map<string, HTMLImageElement>,
+  pageIndex = 0,
 ): HTMLCanvasElement {
   const { width, height } = ASPECT_DIMENSIONS[project.aspectRatio]
   const stage = stageSizeFor(project.aspectRatio, width)
@@ -85,12 +86,14 @@ export function renderPage(
   // Background (cover + zoom/pan)
   const bgImg = background.assetId ? images.get(background.assetId) : undefined
   if (bgImg) {
-    const crop = backgroundCropRect(
+    const crop = continuousBackgroundCropRect(
       { width: bgImg.naturalWidth, height: bgImg.naturalHeight },
       stage,
       background.transform.scale,
       background.transform.x - 0.5,
       background.transform.y - 0.5,
+      pageIndex,
+      project.pages.length,
     )
     withFilter(ctx, background.adjustments, () => {
       ctx.drawImage(bgImg, crop.x, crop.y, crop.width, crop.height, 0, 0, width, height)
@@ -162,6 +165,15 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   })
 }
 
+/**
+ * Renderiza todas as páginas como data URLs (PNG), com a MESMA geometria do
+ * editor/exportação. Usado no preview de carrossel (fundo contínuo fiel).
+ */
+export async function renderProjectToDataUrls(project: Project): Promise<string[]> {
+  const images = await imagesFor(project)
+  return project.pages.map((page, i) => renderPage(page, project, images, i).toDataURL('image/png'))
+}
+
 /** Renderiza todas as páginas do projeto como PNGs (Blobs). */
 export async function renderProjectToPngs(
   project: Project,
@@ -170,7 +182,7 @@ export async function renderProjectToPngs(
   const images = await imagesFor(project)
   const blobs: Blob[] = []
   for (let i = 0; i < project.pages.length; i++) {
-    const canvas = renderPage(project.pages[i], project, images)
+    const canvas = renderPage(project.pages[i], project, images, i)
     blobs.push(await canvasToBlob(canvas))
     onProgress?.(i + 1, project.pages.length)
   }

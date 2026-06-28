@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { useEditorStore, editorTemporal } from '../../store/editorStore'
 import { loadProject, saveProject } from '../../lib/storage'
 import { AppBar, IconButton } from '../../components/ui'
-import { ChevronLeft } from '../../components/icons'
+import { ChevronLeft, Eye } from '../../components/icons'
 import { Toolbar, Filmstrip, SidePanel } from './Panels'
 import { ExportButton } from './ExportButton'
+import { CarouselPreview } from './CarouselPreview'
 
 const EditorStage = lazy(() => import('./canvas/EditorStage'))
 
@@ -25,6 +26,7 @@ export function EditorPage() {
 
   const stageWrapRef = useRef<HTMLDivElement>(null)
   const [stageWidth, setStageWidth] = useState(320)
+  const [previewing, setPreviewing] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -110,6 +112,9 @@ export function EditorPage() {
         right={
           <>
             <Toolbar />
+            <IconButton label={t('editor.preview')} onClick={() => setPreviewing(true)}>
+              <Eye />
+            </IconButton>
             <ExportButton project={project} />
           </>
         }
@@ -124,6 +129,8 @@ export function EditorPage() {
               bgColor={project.bgColor}
               aspectRatio={project.aspectRatio}
               width={stageWidth}
+              pageIndex={currentPageIndex}
+              pageCount={project.pages.length}
               selectedPhotoId={selectedPhotoId}
               onSelect={selectPhoto}
               onChangePhoto={(photoId, updater) => updateCollagePhoto(page.id, photoId, updater)}
@@ -134,6 +141,8 @@ export function EditorPage() {
 
       <Filmstrip project={project} />
       <SidePanel project={project} />
+
+      {previewing && <CarouselPreview project={project} onClose={() => setPreviewing(false)} />}
     </div>
   )
 }

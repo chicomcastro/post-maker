@@ -5,6 +5,7 @@ import {
   nodeToTransform,
   coverRect,
   backgroundCropRect,
+  continuousBackgroundCropRect,
   clamp,
 } from './editor-geometry'
 import { createProjectFromTemplate } from './project-factory'
@@ -67,6 +68,38 @@ describe('editor-geometry', () => {
     const right = backgroundCropRect(natural, stage, 1, 0.5, 0)
     expect(left.x).toBeCloseTo(0)
     expect(right.x).toBeCloseTo(200)
+  })
+
+  it('continuousBackgroundCropRect: pageCount 1 = backgroundCropRect', () => {
+    const natural = { width: 400, height: 400 }
+    const stage = { width: 100, height: 200 }
+    const base = backgroundCropRect(natural, stage, 1.4, 0.1, -0.2)
+    const cont = continuousBackgroundCropRect(natural, stage, 1.4, 0.1, -0.2, 0, 1)
+    expect(cont).toEqual(base)
+  })
+
+  it('continuousBackgroundCropRect: fatia a imagem em faixas contíguas por página', () => {
+    const natural = { width: 1200, height: 200 }
+    const stage = { width: 100, height: 200 } // 2 páginas => faixa 200x200
+    const p0 = continuousBackgroundCropRect(natural, stage, 1, 0, 0, 0, 2)
+    const p1 = continuousBackgroundCropRect(natural, stage, 1, 0, 0, 1, 2)
+    // mesma fatia de largura, alturas idênticas, sem buraco/sobreposição
+    expect(p0.width).toBeCloseTo(p1.width)
+    expect(p0.height).toBeCloseTo(p1.height)
+    expect(p0.y).toBeCloseTo(p1.y)
+    expect(p1.x).toBeCloseTo(p0.x + p0.width)
+    // a união das fatias é exatamente o recorte da faixa inteira
+    const full = backgroundCropRect(natural, { width: 200, height: 200 }, 1, 0, 0)
+    expect(p0.x).toBeCloseTo(full.x)
+    expect(p1.x + p1.width).toBeCloseTo(full.x + full.width)
+  })
+
+  it('continuousBackgroundCropRect: limita índice de página fora do intervalo', () => {
+    const natural = { width: 1200, height: 200 }
+    const stage = { width: 100, height: 200 }
+    const last = continuousBackgroundCropRect(natural, stage, 1, 0, 0, 1, 2)
+    const tooFar = continuousBackgroundCropRect(natural, stage, 1, 0, 0, 9, 2)
+    expect(tooFar).toEqual(last)
   })
 
   it('clamp limita o valor', () => {

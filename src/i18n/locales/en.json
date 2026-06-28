@@ -87,6 +87,9 @@
       "cool": "Cool",
       "vivid": "Vivid"
     },
+    "preview": "Preview",
+    "previewTitle": "Carousel preview",
+    "previewRendering": "Building the preview…",
     "export": "Export",
     "exporting": "Rendering…",
     "exportProgress": "Rendering {{done}}/{{total}}…",

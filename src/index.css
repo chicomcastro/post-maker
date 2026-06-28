@@ -439,7 +439,10 @@ a {
 }
 .page-preview__bg {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   background-size: cover;
   background-position: center;
 }
@@ -451,6 +454,93 @@ a {
 }
 .page-preview__photo--empty {
   border: 1px dashed rgba(255, 255, 255, 0.7);
+}
+
+/* ===== Carousel preview (swipe, estilo Instagram) ===== */
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #0b0e14;
+  display: flex;
+  flex-direction: column;
+  animation: preview-in 0.2s ease;
+}
+@keyframes preview-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.preview-overlay__bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(8px, env(safe-area-inset-top)) 10px 8px;
+  color: #fff;
+}
+.preview-overlay__bar .icon-btn {
+  color: #fff;
+}
+.preview-overlay__title {
+  font-weight: 650;
+  font-size: 0.95rem;
+}
+.preview-track {
+  flex: 1 1 auto;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.preview-track::-webkit-scrollbar {
+  display: none;
+}
+.preview-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+}
+.preview-slide img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.preview-dots {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0 calc(14px + env(safe-area-inset-bottom));
+}
+.preview-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  transition: background 0.15s ease;
+}
+.preview-dot--active {
+  background: #fff;
+}
+.preview-loading {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
 }
 
 /* ===== Photo picker ===== */

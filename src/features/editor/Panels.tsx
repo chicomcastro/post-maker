@@ -68,6 +68,8 @@ export function Filmstrip({ project }: { project: Project }) {
             bgColor={project.bgColor}
             aspectRatio={project.aspectRatio}
             urls={urls}
+            pageIndex={i}
+            pageCount={project.pages.length}
           />
         </button>
       ))}

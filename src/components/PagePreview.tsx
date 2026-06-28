@@ -8,9 +8,12 @@ interface PagePreviewProps {
   aspectRatio: AspectRatio
   urls: Record<string, string>
   className?: string
+  /** Para o fundo contínuo: índice da página e total de páginas do carrossel. */
+  pageIndex?: number
+  pageCount?: number
 }
 
-/** Render read-only de uma página (background compartilhado + colagem). */
+/** Render read-only de uma página (background contínuo compartilhado + colagem). */
 export function PagePreview({
   page,
   background,
@@ -18,8 +21,12 @@ export function PagePreview({
   aspectRatio,
   urls,
   className,
+  pageIndex = 0,
+  pageCount = 1,
 }: PagePreviewProps) {
   const bgUrl = background.assetId ? urls[background.assetId] : undefined
+  const pages = Math.max(1, pageCount)
+  const index = Math.min(Math.max(0, pageIndex), pages - 1)
 
   return (
     <div
@@ -30,7 +37,13 @@ export function PagePreview({
         <div
           className="page-preview__bg"
           style={{
+            // A imagem cobre a faixa de todas as páginas; deslocamos para mostrar
+            // a fatia desta página — dá o efeito de panorama contínuo.
             backgroundImage: `url(${bgUrl})`,
+            width: `${pages * 100}%`,
+            left: `${-index * 100}%`,
+            transform: `scale(${background.transform.scale})`,
+            transformOrigin: `${background.transform.x * 100}% ${background.transform.y * 100}%`,
             ...adjustmentFilter(background.adjustments),
           }}
         />
