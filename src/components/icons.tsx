@@ -81,3 +81,9 @@ export const Pencil = (p: SVGProps<SVGSVGElement>) => (
     <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
   </svg>
 )
+export const Sparkle = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base} {...p}>
+    <path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
+    <path d="M12 8a4 4 0 0 0 4 4 4 4 0 0 0-4 4 4 4 0 0 0-4-4 4 4 0 0 0 4-4Z" />
+  </svg>
+)

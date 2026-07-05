@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { AppBar } from '../components/ui'
-import { Plus } from '../components/icons'
+import { Plus, Sparkle } from '../components/icons'
 import { listProjects, deleteProject, saveProject } from '../lib/storage'
 import type { Project } from '../types/project'
 import { ProjectCard } from './ProjectCard'
@@ -45,6 +45,13 @@ export function Home() {
           onClick={() => navigate('/new')}
         >
           <Plus /> {t('home.create')}
+        </button>
+        <button
+          className="btn btn--ghost btn--block home-suggest"
+          type="button"
+          onClick={() => navigate('/suggestions')}
+        >
+          <Sparkle /> {t('home.suggestions')}
         </button>
 
         {projects.length === 0 ? (

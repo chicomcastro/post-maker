@@ -2,6 +2,19 @@ import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 import type { Project } from '../types/project'
 import { normalizeProject } from './migrations'
 
+/** Foto da biblioteca do usuário: asset + metadados p/ agrupar por dia/lugar. */
+export interface LibraryPhoto {
+  assetId: string
+  /** Momento da captura (EXIF; fallback: lastModified do arquivo). */
+  takenAt: number
+  /** Coordenadas EXIF, quando presentes. */
+  lat?: number
+  lon?: number
+  /** Nome do lugar (geocodificação opcional, feita a pedido do usuário). */
+  place?: string
+  addedAt: number
+}
+
 interface PostMakerDB extends DBSchema {
   projects: {
     key: string
@@ -15,6 +28,11 @@ interface PostMakerDB extends DBSchema {
     // Blob antigo (de versões anteriores) é tolerado na leitura.
     value: StoredAsset | Blob
   }
+  library: {
+    key: string
+    value: LibraryPhoto
+    indexes: { takenAt: number }
+  }
 }
 
 interface StoredAsset {
@@ -23,17 +41,23 @@ interface StoredAsset {
 }
 
 const DB_NAME = 'post-maker'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 let dbPromise: Promise<IDBPDatabase<PostMakerDB>> | null = null
 
 function getDB(): Promise<IDBPDatabase<PostMakerDB>> {
   if (!dbPromise) {
     dbPromise = openDB<PostMakerDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        const projects = db.createObjectStore('projects', { keyPath: 'id' })
-        projects.createIndex('updatedAt', 'updatedAt')
-        db.createObjectStore('assets')
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          const projects = db.createObjectStore('projects', { keyPath: 'id' })
+          projects.createIndex('updatedAt', 'updatedAt')
+          db.createObjectStore('assets')
+        }
+        if (oldVersion < 2) {
+          const library = db.createObjectStore('library', { keyPath: 'assetId' })
+          library.createIndex('takenAt', 'takenAt')
+        }
       },
     })
   }
@@ -89,7 +113,41 @@ export async function deleteAsset(id: string): Promise<void> {
   await db.delete('assets', id)
 }
 
-/** Remove assets que não são mais referenciados por nenhum projeto. */
+/** Adiciona/atualiza fotos na biblioteca (metadados por assetId). */
+export async function putLibraryPhotos(photos: LibraryPhoto[]): Promise<void> {
+  const db = await getDB()
+  const tx = db.transaction('library', 'readwrite')
+  for (const photo of photos) await tx.store.put(photo)
+  await tx.done
+}
+
+/** Lista a biblioteca da foto mais recente para a mais antiga. */
+export async function listLibraryPhotos(): Promise<LibraryPhoto[]> {
+  const db = await getDB()
+  const all = await db.getAllFromIndex('library', 'takenAt')
+  return all.reverse()
+}
+
+/** Grava o nome do lugar (geocodificação) de fotos da biblioteca. */
+export async function setLibraryPlaces(places: Map<string, string>): Promise<void> {
+  const db = await getDB()
+  const tx = db.transaction('library', 'readwrite')
+  for (const [assetId, place] of places) {
+    const photo = await tx.store.get(assetId)
+    if (photo) await tx.store.put({ ...photo, place })
+  }
+  await tx.done
+}
+
+export async function removeLibraryPhoto(assetId: string): Promise<void> {
+  const db = await getDB()
+  await db.delete('library', assetId)
+}
+
+/**
+ * Remove assets que não são referenciados por nenhum projeto NEM pela
+ * biblioteca de fotos.
+ */
 export async function pruneOrphanAssets(): Promise<number> {
   const db = await getDB()
   const projects = await db.getAll('projects')
@@ -103,6 +161,7 @@ export async function pruneOrphanAssets(): Promise<number> {
       }
     }
   }
+  for (const key of await db.getAllKeys('library')) referenced.add(key)
   const keys = await db.getAllKeys('assets')
   let removed = 0
   for (const key of keys) {

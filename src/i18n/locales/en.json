@@ -6,6 +6,7 @@
   "home": {
     "subtitle": "Build beautiful Instagram carousels in minutes. Your photos never leave your device.",
     "create": "Create new project",
+    "suggestions": "Suggestions by date and place",
     "continue": "Continue project",
     "noProjects": "Create your first project to get started.",
     "yourProjects": "Your projects",
@@ -16,6 +17,21 @@
     "pageCount_other": "{{count}} pages",
     "photoCount_one": "{{count}} photo",
     "photoCount_other": "{{count}} photos"
+  },
+  "suggestions": {
+    "title": "Post suggestions",
+    "dropHint": "Add photos from your library (multi-select supported)",
+    "privacy": "Everything is analyzed on your device — photos never leave it.",
+    "importing": "Importing {{done}}/{{total}}…",
+    "naming": "Looking up place names…",
+    "empty": "Add photos and the app groups them by day and place, suggesting ready-made carousels.",
+    "groups_one": "{{count}} moment found",
+    "groups_other": "{{count}} moments found",
+    "namePlaces": "Name places",
+    "noPlace": "No location",
+    "somewhere": "Outing",
+    "projectName": "{{place}} — {{date}}",
+    "create": "Create carousel"
   },
   "language": {
     "label": "Language",
