@@ -1,6 +1,12 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
-import { clusterByDayAndPlace, chooseTemplateFor, haversineKm, localDay } from './suggestions'
+import {
+  clusterByDayAndPlace,
+  clusterByPlaceAcrossDays,
+  chooseTemplateFor,
+  haversineKm,
+  localDay,
+} from './suggestions'
 import { templateCollageCount } from '../templates/catalog'
 import type { LibraryPhoto } from './storage'
 
@@ -74,6 +80,43 @@ describe('clusterByDayAndPlace', () => {
       photo('b', DAY1, -3.1, -60.02, 'Manaus, Amazonas'),
     ])
     expect(groups[0].place).toBe('Manaus, Amazonas')
+  })
+})
+
+describe('chaves estáveis (para dispensa persistente)', () => {
+  it('mantém a chave quando novas fotos entram no mesmo dia/lugar', () => {
+    const before = clusterByDayAndPlace([photo('a', DAY1, -3.1, -60.02)])
+    const after = clusterByDayAndPlace([
+      photo('a', DAY1, -3.1, -60.02),
+      photo('b', DAY1 + 3600e3, -3.101, -60.021),
+    ])
+    expect(after[0].key).toBe(before[0].key)
+  })
+})
+
+describe('clusterByPlaceAcrossDays', () => {
+  it('sugere série quando o mesmo lugar aparece em 2+ dias', () => {
+    const groups = clusterByPlaceAcrossDays([
+      photo('a', DAY1, -3.1, -60.02),
+      photo('b', DAY2, -3.101, -60.021),
+      photo('c', DAY2, -9.0, -35.2), // outro lugar, um dia só => fora
+    ])
+    expect(groups).toHaveLength(1)
+    expect(groups[0].days).toEqual(['2026-06-27', '2026-06-28'])
+    expect(groups[0].photos.map((p) => p.assetId)).toEqual(['a', 'b'])
+    expect(groups[0].key.startsWith('place@')).toBe(true)
+  })
+
+  it('não sugere série para lugar visitado num único dia', () => {
+    const groups = clusterByPlaceAcrossDays([
+      photo('a', DAY1, -3.1, -60.02),
+      photo('b', DAY1 + 3600e3, -3.101, -60.021),
+    ])
+    expect(groups).toHaveLength(0)
+  })
+
+  it('ignora fotos sem GPS', () => {
+    expect(clusterByPlaceAcrossDays([photo('a', DAY1), photo('b', DAY2)])).toHaveLength(0)
   })
 })
 

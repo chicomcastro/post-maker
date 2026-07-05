@@ -63,4 +63,37 @@ describe('SuggestionsPage', () => {
     expect(await screen.findByText(/Manaus, Amazonas/)).toBeInTheDocument()
     expect(reverseGeocode).toHaveBeenCalledWith(-3.1, -60.02)
   })
+
+  it('sugere série "mesmo lugar, outras datas" quando há revisita', async () => {
+    await putLibraryPhotos([
+      { assetId: 'a', takenAt: DAY, lat: -3.1, lon: -60.02, addedAt: 1 },
+      { assetId: 'b', takenAt: DAY + 86400e3, lat: -3.101, lon: -60.021, addedAt: 1 },
+    ])
+    renderPage()
+    expect(await screen.findByText(/mesmo lugar, outras datas/i)).toBeInTheDocument()
+    expect(screen.getByText(/2 dias/)).toBeInTheDocument()
+  })
+
+  it('dispensa uma sugestão (persistida) e restaura', async () => {
+    localStorage.clear()
+    await putLibraryPhotos([{ assetId: 'a', takenAt: DAY, addedAt: 1 }])
+    renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: /dispensar sugestão/i }))
+    expect(screen.queryByRole('button', { name: /criar carrossel/i })).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /restaurar 1 sugestão/i }))
+    expect(await screen.findByRole('button', { name: /criar carrossel/i })).toBeInTheDocument()
+  })
+
+  it('gerencia a biblioteca: remove foto e a sugestão some', async () => {
+    await putLibraryPhotos([{ assetId: 'a', takenAt: DAY, addedAt: 1 }])
+    renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: /gerenciar/i }))
+    expect(screen.getByText(/1 foto na biblioteca/i)).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /remover da biblioteca/i }))
+    await waitFor(() => expect(screen.queryByText(/1 foto na biblioteca/i)).not.toBeInTheDocument())
+  })
 })

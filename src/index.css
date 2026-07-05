@@ -420,6 +420,47 @@ a {
 .suggestion-card .btn {
   flex: 0 0 auto;
 }
+.suggestion-card .icon-btn {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+.suggestions__series-title {
+  margin-top: 22px;
+}
+.suggestions__restore {
+  margin-top: 16px;
+}
+
+/* Modo gerenciar: grade da biblioteca. */
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+}
+.library-grid__item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background-color: var(--dark);
+  background-size: cover;
+  background-position: center;
+}
+.library-grid__remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .section-title {
   font-size: 0.82rem;
   text-transform: uppercase;

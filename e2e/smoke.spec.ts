@@ -343,6 +343,29 @@ test('sugestões: importa em massa, agrupa por dia e cria carrossel pronto', asy
   expect(errors).toEqual([])
 })
 
+test('sugestões: dispensa/restaura e gerencia a biblioteca', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await page.goto(APP)
+  await page.getByRole('button', { name: /sugestões por data e lugar/i }).click()
+  await page.setInputFiles('input[type=file]', [IMG, SMALL])
+  await expect(page.locator('.suggestion-card')).toHaveCount(1)
+
+  // dispensa a sugestão => some; restaurar => volta
+  await page.getByRole('button', { name: /dispensar sugestão/i }).click()
+  await expect(page.locator('.suggestion-card')).toHaveCount(0)
+  await page.getByRole('button', { name: /restaurar 1 sugestão/i }).click()
+  await expect(page.locator('.suggestion-card')).toHaveCount(1)
+
+  // gerenciar: limpa a biblioteca inteira (aceita o confirm) => estado vazio
+  page.once('dialog', (dialog) => void dialog.accept())
+  await page.getByRole('button', { name: /gerenciar/i }).click()
+  await expect(page.getByText(/2 fotos na biblioteca/i)).toBeVisible()
+  await page.getByRole('button', { name: /limpar tudo/i }).click()
+  await expect(page.getByText(/adicione fotos e o app agrupa/i)).toBeVisible()
+
+  expect(errors).toEqual([])
+})
+
 test('resiliência: projeto em formato antigo não causa tela branca', async ({ page }) => {
   const errors = guardPageErrors(page)
   await page.goto(APP)
