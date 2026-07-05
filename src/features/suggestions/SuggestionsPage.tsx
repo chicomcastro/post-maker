@@ -2,11 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppBar, IconButton } from '../../components/ui'
-import { ChevronLeft, ImagePlus, Globe, Close, Trash } from '../../components/icons'
+import { ChevronLeft, ImagePlus, Globe, Trash } from '../../components/icons'
 import {
   listLibraryPhotos,
   setLibraryPlaces,
-  saveProject,
   removeLibraryPhoto,
   clearLibrary,
   pruneOrphanAssets,
@@ -17,14 +16,12 @@ import { reverseGeocode } from '../../lib/geocode'
 import {
   clusterByDayAndPlace,
   clusterByPlaceAcrossDays,
-  chooseTemplateFor,
   type SuggestionGroup,
 } from '../../lib/suggestions'
 import { loadDismissed, dismiss, restoreAll } from '../../lib/dismissals'
-import { createProjectFromTemplate, distributePhotos } from '../../lib/project-factory'
 import { useAssetUrls } from '../../hooks/useAssetUrls'
-
-const LOCALES: Record<string, string> = { pt: 'pt-BR', en: 'en-US' }
+import { MomentCard } from './MomentCard'
+import { createProjectFromGroup, momentDateLabel } from './moment'
 
 /**
  * Sugestões automáticas: importa fotos em massa, agrupa por dia + localidade e
@@ -84,20 +81,8 @@ export function SuggestionsPage() {
   }
 
   async function createFromGroup(group: SuggestionGroup) {
-    const template = chooseTemplateFor(group.photos.length)
-    const multiDay = group.days.length > 1
-    const base = createProjectFromTemplate(template, {
-      name: t('suggestions.projectName', {
-        place: group.place ?? t('suggestions.somewhere'),
-        date: multiDay ? t('suggestions.multipleDates') : formatDay(group.takenAt),
-      }),
-    })
-    const { project } = distributePhotos(
-      base,
-      group.photos.map((p) => p.assetId),
-    )
-    await saveProject(project)
-    navigate(`/editor/${project.id}`)
+    const id = await createProjectFromGroup(group, t, i18n.language)
+    navigate(`/editor/${id}`)
   }
 
   async function removePhoto(assetId: string) {
@@ -112,19 +97,6 @@ export function SuggestionsPage() {
     await pruneOrphanAssets()
     setLibrary([])
     setManaging(false)
-  }
-
-  // Formato numérico compacto (ano curto): cabe no card com os botões ao lado.
-  function formatDay(ts: number): string {
-    return new Date(ts).toLocaleDateString(LOCALES[i18n.language] ?? i18n.language, {
-      day: '2-digit',
-      month: '2-digit',
-      year: '2-digit',
-    })
-  }
-
-  function seriesDateLabel(group: SuggestionGroup): string {
-    return t('suggestions.dayCount', { count: group.days.length })
   }
 
   const canName = [...visibleDays, ...visibleSeries].some((g) => g.lat != null && !g.place)
@@ -188,10 +160,10 @@ export function SuggestionsPage() {
             </div>
             <ul className="suggestion-list">
               {visibleDays.map((group) => (
-                <SuggestionCard
+                <MomentCard
                   key={group.key}
                   group={group}
-                  dateLabel={formatDay(group.takenAt)}
+                  dateLabel={momentDateLabel(group, t, i18n.language)}
                   onCreate={() => createFromGroup(group)}
                   onDismiss={() => setDismissed(dismiss(group.key))}
                 />
@@ -205,10 +177,10 @@ export function SuggestionsPage() {
                 </h2>
                 <ul className="suggestion-list">
                   {visibleSeries.map((group) => (
-                    <SuggestionCard
+                    <MomentCard
                       key={group.key}
                       group={group}
-                      dateLabel={seriesDateLabel(group)}
+                      dateLabel={momentDateLabel(group, t, i18n.language)}
                       onCreate={() => createFromGroup(group)}
                       onDismiss={() => setDismissed(dismiss(group.key))}
                     />
@@ -230,55 +202,6 @@ export function SuggestionsPage() {
         )}
       </div>
     </>
-  )
-}
-
-function SuggestionCard({
-  group,
-  dateLabel,
-  onCreate,
-  onDismiss,
-}: {
-  group: SuggestionGroup
-  dateLabel: string
-  onCreate: () => void
-  onDismiss: () => void
-}) {
-  const { t } = useTranslation()
-  const preview = group.photos.slice(0, 4)
-  const urls = useAssetUrls(preview.map((p) => p.assetId))
-  const placeLabel =
-    group.place ??
-    (group.lat != null
-      ? `${group.lat.toFixed(3)}, ${group.lon!.toFixed(3)}`
-      : t('suggestions.noPlace'))
-
-  return (
-    <li className="suggestion-card">
-      <div className="suggestion-card__thumbs">
-        {preview.map((p) => (
-          <span
-            key={p.assetId}
-            className="suggestion-card__thumb"
-            style={{
-              backgroundImage: urls[p.assetId] ? `url(${urls[p.assetId]})` : undefined,
-            }}
-          />
-        ))}
-      </div>
-      <div className="suggestion-card__body">
-        <div className="suggestion-card__title">{dateLabel}</div>
-        <div className="suggestion-card__meta muted">
-          {placeLabel} · {t('home.photoCount', { count: group.photos.length })}
-        </div>
-      </div>
-      <button type="button" className="btn btn--sm" onClick={onCreate}>
-        {t('suggestions.create')}
-      </button>
-      <IconButton label={t('suggestions.dismiss')} onClick={onDismiss}>
-        <Close />
-      </IconButton>
-    </li>
   )
 }
 

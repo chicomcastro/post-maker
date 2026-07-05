@@ -4,17 +4,37 @@ import { useTranslation } from 'react-i18next'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { AppBar } from '../components/ui'
 import { Plus, Sparkle } from '../components/icons'
-import { listProjects, deleteProject, saveProject } from '../lib/storage'
+import { listProjects, deleteProject, saveProject, listLibraryPhotos } from '../lib/storage'
 import type { Project } from '../types/project'
+import {
+  clusterByDayAndPlace,
+  clusterByPlaceAcrossDays,
+  type SuggestionGroup,
+} from '../lib/suggestions'
+import { loadDismissed } from '../lib/dismissals'
+import { MomentCard } from '../features/suggestions/MomentCard'
+import { createProjectFromGroup, momentDateLabel } from '../features/suggestions/moment'
 import { ProjectCard } from './ProjectCard'
 
+/** Quantos momentos mostrar em destaque na home (o resto fica na tela dedicada). */
+const HOME_MOMENTS = 3
+
 export function Home() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [projects, setProjects] = useState<Project[]>([])
+  const [moments, setMoments] = useState<SuggestionGroup[]>([])
 
   useEffect(() => {
     listProjects().then(setProjects)
+    // Momentos recentes da biblioteca (mesma lógica da tela de sugestões).
+    listLibraryPhotos().then((lib) => {
+      const dismissed = loadDismissed()
+      const groups = [...clusterByDayAndPlace(lib), ...clusterByPlaceAcrossDays(lib)]
+        .filter((g) => !dismissed.has(g.key))
+        .sort((a, b) => b.takenAt - a.takenAt)
+      setMoments(groups.slice(0, HOME_MOMENTS))
+    })
     // Pré-carrega o chunk do editor (Konva) em segundo plano, para abrir um
     // projeto sem esperar o download/parse na hora do clique.
     const prefetch = () => void import('../features/editor/canvas/EditorStage')
@@ -23,6 +43,11 @@ export function Home() {
     if (ric) ric(prefetch)
     else setTimeout(prefetch, 400)
   }, [])
+
+  async function createFromMoment(group: SuggestionGroup) {
+    const id = await createProjectFromGroup(group, t, i18n.language)
+    navigate(`/editor/${id}`)
+  }
 
   async function remove(id: string) {
     await deleteProject(id)
@@ -46,13 +71,40 @@ export function Home() {
         >
           <Plus /> {t('home.create')}
         </button>
-        <button
-          className="btn btn--ghost btn--block home-suggest"
-          type="button"
-          onClick={() => navigate('/suggestions')}
-        >
-          <Sparkle /> {t('home.suggestions')}
-        </button>
+        {moments.length === 0 && (
+          <button
+            className="btn btn--ghost btn--block home-suggest"
+            type="button"
+            onClick={() => navigate('/suggestions')}
+          >
+            <Sparkle /> {t('home.suggestions')}
+          </button>
+        )}
+
+        {moments.length > 0 && (
+          <>
+            <div className="suggestions__bar home-moments__bar">
+              <h2 className="section-title">{t('home.recentMoments')}</h2>
+              <button
+                type="button"
+                className="btn btn--ghost btn--sm"
+                onClick={() => navigate('/suggestions')}
+              >
+                {t('home.seeAllMoments')}
+              </button>
+            </div>
+            <ul className="suggestion-list home-moments">
+              {moments.map((group) => (
+                <MomentCard
+                  key={group.key}
+                  group={group}
+                  dateLabel={momentDateLabel(group, t, i18n.language)}
+                  onCreate={() => createFromMoment(group)}
+                />
+              ))}
+            </ul>
+          </>
+        )}
 
         {projects.length === 0 ? (
           <p className="empty">{t('home.noProjects')}</p>
