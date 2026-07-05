@@ -356,9 +356,12 @@ test('sugestões: importa em massa, agrupa por dia e cria carrossel pronto', asy
   // pool tem as 3 fotos (miniaturas além de "Nenhum" e do "+")
   await expect(page.locator('.thumbs .thumb:not(.thumb--none):not(.thumb--add)')).toHaveCount(3)
 
-  // a biblioteca persiste: voltar à tela de sugestões mantém o grupo
+  // a biblioteca persiste: a home passa a mostrar "Momentos recentes"
   await page.getByRole('button', { name: /voltar para o início/i }).click()
-  await page.getByRole('button', { name: /sugestões por data e lugar/i }).click()
+  await expect(page.getByText(/momentos recentes/i)).toBeVisible()
+  await expect(page.locator('.suggestion-card')).toHaveCount(1)
+  // "Ver todos" leva à tela completa de sugestões
+  await page.getByRole('button', { name: /ver todos/i }).click()
   await expect(page.locator('.suggestion-card')).toHaveCount(1)
 
   expect(errors).toEqual([])

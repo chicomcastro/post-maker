@@ -354,6 +354,12 @@ a {
 .home-suggest {
   margin: 0 0 22px;
 }
+.home-moments__bar {
+  margin-top: 4px;
+}
+.home-moments {
+  margin-bottom: 22px;
+}
 
 /* ===== Sugestões (agrupamento por dia/lugar) ===== */
 .suggestions__drop {

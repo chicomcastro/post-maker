@@ -33,3 +33,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0024](0024-sugestoes-por-dia-e-lugar.md)                 | Sugestões automáticas por dia e lugar (EXIF)          | Aceito |
 | [0025](0025-series-por-lugar-dispensa-e-biblioteca.md)    | Séries por lugar, dispensa e gestão da biblioteca     | Aceito |
 | [0026](0026-template-automatico-na-criacao.md)            | Template automático na criação (pela qtd. de fotos)   | Aceito |
+| [0027](0027-momentos-na-home.md)                          | Momentos recentes na home (quando há biblioteca)      | Aceito |
