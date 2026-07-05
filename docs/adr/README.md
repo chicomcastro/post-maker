@@ -32,3 +32,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0023](0023-adicionar-fotos-a-qualquer-momento.md)        | Adicionar fotos a qualquer momento e contagem honesta | Aceito |
 | [0024](0024-sugestoes-por-dia-e-lugar.md)                 | Sugestões automáticas por dia e lugar (EXIF)          | Aceito |
 | [0025](0025-series-por-lugar-dispensa-e-biblioteca.md)    | Séries por lugar, dispensa e gestão da biblioteca     | Aceito |
+| [0026](0026-template-automatico-na-criacao.md)            | Template automático na criação (pela qtd. de fotos)   | Aceito |

@@ -663,6 +663,42 @@ a {
   gap: 8px;
   flex-wrap: wrap;
 }
+/* Opção "Automático" no topo da escolha de template. */
+.auto-template {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  transition: transform 0.08s ease;
+}
+.auto-template:active {
+  transform: scale(0.98);
+}
+.auto-template svg {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+.auto-template span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.auto-template strong {
+  font-weight: 700;
+}
+.auto-template small {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
 .template-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

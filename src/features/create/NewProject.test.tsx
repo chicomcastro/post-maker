@@ -40,6 +40,16 @@ describe('NewProject — fluxo', () => {
     expect(screen.getAllByRole('button', { name: /^post-/ })).toHaveLength(6)
   })
 
+  it('opção automática leva às fotos com dica de escolha por quantidade', async () => {
+    const user = userEvent.setup()
+    renderFlow()
+    await user.click(screen.getByRole('button', { name: /feed/i }))
+
+    await user.click(screen.getByRole('button', { name: /automático/i }))
+    expect(screen.getByRole('heading', { name: /selecione suas fotos/i })).toBeInTheDocument()
+    expect(screen.getByText(/escolhemos o melhor layout/i)).toBeInTheDocument()
+  })
+
   it('exige ao menos uma foto para criar', async () => {
     const user = userEvent.setup()
     renderFlow()
