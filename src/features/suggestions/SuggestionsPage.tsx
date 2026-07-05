@@ -114,12 +114,12 @@ export function SuggestionsPage() {
     setManaging(false)
   }
 
-  // Formato numérico compacto: cabe no card mesmo com os botões ao lado.
+  // Formato numérico compacto (ano curto): cabe no card com os botões ao lado.
   function formatDay(ts: number): string {
     return new Date(ts).toLocaleDateString(LOCALES[i18n.language] ?? i18n.language, {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric',
+      year: '2-digit',
     })
   }
 

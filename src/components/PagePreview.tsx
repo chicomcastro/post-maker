@@ -58,9 +58,10 @@ export function PagePreview({
           transform: `translate(-50%, -50%) rotate(${photo.transform.rotation}deg) scale(${photo.transform.scale})`,
           borderRadius: `${photo.frame.cornerRadius * 100}%`,
           boxShadow: photo.style.shadow ? '0 6px 16px rgba(0,0,0,0.25)' : undefined,
+          // Aproximação para miniaturas (~8% da escala nominal de 1080px).
           outline:
             photo.style.borderWidth > 0
-              ? `${photo.style.borderWidth}px solid ${photo.style.borderColor}`
+              ? `${Math.max(1, Math.round(photo.style.borderWidth * 0.08))}px solid ${photo.style.borderColor}`
               : undefined,
           backgroundImage: url ? `url(${url})` : undefined,
           // Enquadramento (pan) dentro do slot; o zoom fica para o editor/export.

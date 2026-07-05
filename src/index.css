@@ -424,8 +424,10 @@ a {
   flex: 0 0 auto;
   color: var(--muted);
 }
-.suggestions__series-title {
-  margin-top: 22px;
+/* Especificidade dupla de propósito: .section-title (definido depois no
+   arquivo) zeraria o margin-top por ordem de cascata. */
+.section-title.suggestions__series-title {
+  margin-top: 28px;
 }
 .suggestions__restore {
   margin-top: 16px;

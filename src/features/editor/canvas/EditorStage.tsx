@@ -1,7 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { Stage, Layer, Rect, Image as KonvaImage, Transformer } from 'react-konva'
 import Konva from 'konva'
-import type { Background, CollagePhoto, Page, AspectRatio } from '../../../types/project'
+import {
+  EXPORT_NOMINAL_WIDTH,
+  type Background,
+  type CollagePhoto,
+  type Page,
+  type AspectRatio,
+} from '../../../types/project'
 import {
   continuousBackgroundCropRect,
   panCrop,
@@ -242,7 +248,9 @@ function CollageImage({
       cornerRadius={cornerPx}
       fill={img ? undefined : 'rgba(255,255,255,0.5)'}
       stroke={photo.style.borderWidth > 0 ? photo.style.borderColor : undefined}
-      strokeWidth={photo.style.borderWidth}
+      // borderWidth é em px nominais de exportação (1080); escala pro palco
+      // para o editor mostrar a mesma proporção do PNG final.
+      strokeWidth={photo.style.borderWidth * (stage.width / EXPORT_NOMINAL_WIDTH)}
       strokeScaleEnabled={false}
       shadowColor="#000000"
       shadowBlur={photo.style.shadow ? 16 : 0}
