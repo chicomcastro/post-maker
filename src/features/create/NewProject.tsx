@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ASPECT_RATIOS, type AspectRatio } from '../../types/project'
 import {
@@ -19,11 +19,21 @@ import { saveProject } from '../../lib/storage'
 
 type Step = 'aspect' | 'template' | 'photos'
 type Filter = 'all' | TemplateKind
-const STEPS: Step[] = ['aspect', 'template', 'photos']
+
+/** Fotos já na biblioteca, passadas via route state — pula a etapa de seleção. */
+interface NewProjectState {
+  assetIds?: string[]
+}
 
 export function NewProject() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Modo "fotos já escolhidas": vem da biblioteca com assetIds; sem etapa de fotos.
+  const preselected = (location.state as NewProjectState | null)?.assetIds ?? null
+  const hasPreselected = !!preselected && preselected.length > 0
+  const steps: Step[] = hasPreselected ? ['aspect', 'template'] : ['aspect', 'template', 'photos']
 
   const [step, setStep] = useState<Step>('aspect')
   const [aspect, setAspect] = useState<AspectRatio | null>(null)
@@ -45,6 +55,35 @@ export function NewProject() {
     if (step === 'template') setStep('aspect')
     else if (step === 'photos') setStep('template')
     else navigate('/')
+  }
+
+  /**
+   * Cria o projeto a partir das fotos da biblioteca já escolhidas: nenhuma
+   * importação de arquivo, só distribui os assetIds no template. Chamado ao
+   * escolher o template (ou "Automático") quando há fotos pré-selecionadas.
+   */
+  async function createFromPreselected(chosen: Template | null) {
+    if (!aspect || !preselected || busy) return
+    setError(null)
+    try {
+      setBusy(t('create.creating'))
+      const layout = chosen ?? chooseTemplateFor(preselected.length)
+      const base = createProjectFromTemplate(layout, { aspectRatio: aspect })
+      const { project } = distributePhotos(base, preselected)
+      await saveProject(project)
+      navigate(`/editor/${project.id}`, { replace: true })
+    } catch (err) {
+      console.error('Falha ao montar o projeto:', err)
+      setBusy(null)
+      setError(t('create.genericError'))
+    }
+  }
+
+  function pickTemplate(tpl: Template | null) {
+    setTemplate(tpl)
+    setAuto(tpl === null)
+    if (hasPreselected) void createFromPreselected(tpl)
+    else setStep('photos')
   }
 
   async function handleFinish() {
@@ -74,7 +113,7 @@ export function NewProject() {
     }
   }
 
-  const stepIndex = STEPS.indexOf(step)
+  const stepIndex = steps.indexOf(step)
 
   return (
     <>
@@ -87,7 +126,7 @@ export function NewProject() {
       />
       <div className="route__scroll">
         <div className="progress" aria-hidden>
-          {STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <span
               key={s}
               className={'progress__seg' + (i <= stepIndex ? ' progress__seg--done' : '')}
@@ -123,15 +162,18 @@ export function NewProject() {
         {step === 'template' && (
           <section className="create__step">
             <h1>{t('create.stepTemplate')}</h1>
+            {hasPreselected && (
+              <p className="muted create__hint">
+                {t('create.preselectedCount', { count: preselected!.length })}
+              </p>
+            )}
+            {error && <p className="error">{error}</p>}
 
             <button
               type="button"
               className="auto-template"
-              onClick={() => {
-                setAuto(true)
-                setTemplate(null)
-                setStep('photos')
-              }}
+              disabled={!!busy}
+              onClick={() => pickTemplate(null)}
             >
               <Sparkle />
               <span>
@@ -165,11 +207,8 @@ export function NewProject() {
                   type="button"
                   className="template-card"
                   aria-label={tpl.id}
-                  onClick={() => {
-                    setTemplate(tpl)
-                    setAuto(false)
-                    setStep('photos')
-                  }}
+                  disabled={!!busy}
+                  onClick={() => pickTemplate(tpl)}
                 >
                   <TemplatePreview template={tpl} aspectRatio={aspect ?? undefined} />
                 </button>

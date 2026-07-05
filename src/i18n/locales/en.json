@@ -49,6 +49,24 @@
     "clearConfirm": "Clear the whole suggestions library? Existing projects are not affected.",
     "create": "Create carousel"
   },
+  "library": {
+    "tabLibrary": "Library",
+    "tabProjects": "Projects",
+    "import": "Import photos",
+    "empty": "Import your photos and the app groups them by day and place, suggesting ready-made carousels.",
+    "byDay": "Day",
+    "byPlace": "Place",
+    "select": "Select",
+    "selectHint": "Press and hold a photo to select",
+    "readyPosts": "Ready to post",
+    "createSelected_one": "Create project ({{count}})",
+    "createSelected_other": "Create project ({{count}})",
+    "removeSelected_one": "Remove {{count}}",
+    "removeSelected_other": "Remove {{count}}",
+    "clearSelection": "Clear selection",
+    "clearAll": "Clear library",
+    "noProjects": "Select photos from your library to create your first carousel."
+  },
   "language": {
     "label": "Language",
     "pt": "Português",
@@ -78,6 +96,8 @@
     "dropHint": "Drag photos here or tap to choose",
     "selectedCount_one": "{{count}} photo selected",
     "selectedCount_other": "{{count}} photos selected",
+    "preselectedCount_one": "{{count}} photo from your library. Pick a layout.",
+    "preselectedCount_other": "{{count}} photos from your library. Pick a layout.",
     "photosHint_one": "This layout fits up to {{count}} photo (one can become the background). Add as many as you like and choose which go in during editing.",
     "photosHint_other": "This layout fits up to {{count}} photos (one can become the background). Add as many as you like and choose which go in during editing.",
     "convertingHeic": "Converting iPhone photos…",

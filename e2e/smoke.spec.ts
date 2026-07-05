@@ -15,37 +15,69 @@ function guardPageErrors(page: Page) {
   return errors
 }
 
-test('home carrega sem erros', async ({ page }) => {
+// Importa fotos para a biblioteca pela home (aba Biblioteca é a inicial).
+async function importLibrary(page: Page, files: string[]) {
+  await page.locator('.suggestions__drop input[type=file]').setInputFiles(files)
+  await expect(page.locator('.library-grid__item--btn').first()).toBeVisible({ timeout: 15000 })
+}
+
+// Fluxo de criação atual: importa, seleciona todas as fotos da grade, cria o
+// projeto (menu de criação sem etapa de fotos) escolhendo formato e template.
+async function createFromLibrary(
+  page: Page,
+  { template, files, aspect = /quadrado/i }: { template: string; files: string[]; aspect?: RegExp },
+) {
+  await page.goto(APP)
+  await importLibrary(page, files)
+  await page.getByRole('button', { name: /^selecionar$/i }).click()
+  const cells = page.locator('.library-grid__item--btn')
+  const n = await cells.count()
+  for (let i = 0; i < n; i++) await cells.nth(i).click()
+  await page.getByRole('button', { name: /criar projeto \(/i }).click()
+  await page.getByRole('button', { name: aspect }).click()
+  await page.getByRole('button', { name: template }).click()
+  await expect(page.locator('canvas')).toBeVisible()
+}
+
+async function selectCenterPhoto(page: Page) {
+  const box = await page.locator('canvas').boundingBox()
+  if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+}
+
+// Cria um projeto post-trio-scatter (3 slots) com 4 fotos e entra no editor.
+async function createTrioProject(page: Page) {
+  await createFromLibrary(page, {
+    template: 'post-trio-scatter',
+    files: [IMG, SMALL, SMALL, SMALL],
+  })
+}
+
+test('home carrega sem erros (biblioteca como tela inicial)', async ({ page }) => {
   const errors = guardPageErrors(page)
   await page.goto(APP)
-  await expect(page.getByRole('button', { name: /criar novo projeto/i })).toBeVisible()
+  await expect(page.getByText(/importar fotos/i)).toBeVisible()
+  await expect(page.getByRole('button', { name: /biblioteca/i })).toBeVisible()
   expect(errors).toEqual([])
 })
 
 // Regressão: em telas largas (iPad/desktop, >=480px) o .app-shell colapsava
-// para largura 0 (tela branca). Garante que o app ocupa a tela toda e o
-// conteúdo aparece em viewport de tablet.
+// para largura 0 (tela branca). Garante que o app ocupa a tela toda.
 test.describe('layout em tela larga (tablet)', () => {
   test.use({ viewport: { width: 834, height: 1180 } })
   test('ocupa a tela inteira e mostra o conteúdo no iPad', async ({ page }) => {
     await page.goto(APP)
-    await expect(page.getByRole('button', { name: /criar novo/i })).toBeVisible()
+    await expect(page.getByText(/importar fotos/i)).toBeVisible()
     const box = await page.locator('.app-shell').boundingBox()
     expect(box).not.toBeNull()
-    // full-screen: app-shell preenche ~toda a viewport (834x1180)
     expect(box!.width).toBeGreaterThan(800)
     expect(box!.height).toBeGreaterThan(1100)
   })
 
   test('editor usa duas colunas (canvas à esquerda, painel à direita)', async ({ page }) => {
-    await page.goto(APP)
-    await page.getByRole('button', { name: /criar novo/i }).click()
-    await page.getByRole('button', { name: /quadrado/i }).click()
-    await page.getByRole('button', { name: 'carousel3-diagonal' }).click()
-    await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL, SMALL, SMALL, SMALL])
-    await page.getByRole('button', { name: /criar projeto/i }).click()
-
-    await expect(page.locator('canvas')).toBeVisible()
+    await createFromLibrary(page, {
+      template: 'carousel3-diagonal',
+      files: [IMG, SMALL, SMALL, SMALL, SMALL, SMALL, SMALL],
+    })
     const stage = await page.locator('.editor__stage').boundingBox()
     const panel = await page.locator('.sheet').boundingBox()
     expect(stage).not.toBeNull()
@@ -58,43 +90,33 @@ test.describe('layout em tela larga (tablet)', () => {
 test('alterna idioma', async ({ page }) => {
   await page.goto(APP)
   await page.getByRole('button', { name: /idioma/i }).click()
-  await expect(page.getByRole('button', { name: /create new/i })).toBeVisible()
+  await expect(page.getByText(/import photos/i)).toBeVisible()
 })
 
 test('fluxo completo: criar carrossel → editor → persiste → exporta', async ({ page }) => {
   const errors = guardPageErrors(page)
-  await page.goto(APP)
-
-  await page.getByRole('button', { name: /criar novo/i }).click()
-  await page.getByRole('button', { name: /quadrado/i }).click()
-  await page.getByRole('button', { name: 'carousel3-diagonal' }).click()
-
-  await expect(page.getByRole('heading', { name: /selecione suas fotos/i })).toBeVisible()
-  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL, SMALL, SMALL, SMALL])
-  await expect(page.getByText(/7 fotos selecionadas/i)).toBeVisible()
-
-  await page.getByRole('button', { name: /criar projeto/i }).click()
+  await createFromLibrary(page, {
+    template: 'carousel3-diagonal',
+    files: [IMG, SMALL, SMALL, SMALL, SMALL, SMALL, SMALL],
+  })
 
   // Editor montou: app bar, palco (canvas) e tira de páginas (3 páginas).
   await expect(page.getByRole('button', { name: /exportar/i })).toBeVisible()
-  await expect(page.locator('canvas')).toBeVisible()
   await expect(page.getByRole('button', { name: /página 1/i })).toBeVisible()
   await expect(page.getByRole('button', { name: /página 3/i })).toBeVisible()
   await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
 
-  // Exporta como imagens diretas (sem zip). Exportar é a ação principal:
-  // abre o seletor e escolhemos "gerar imagens" → baixa os PNGs.
+  // Exporta como imagens diretas (sem zip). Exportar é a ação principal.
   await page.getByRole('button', { name: /^exportar$/i }).click()
   const downloadPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: /gerar imagens/i }).click()
   const download = await downloadPromise
   expect(download.suggestedFilename()).toMatch(/\.png$/)
 
-  // Persistência: volta à home e o projeto aparece salvo.
+  // Persistência: volta à home, abre a aba Projetos e o projeto aparece salvo.
   await page.getByRole('button', { name: /voltar para o início/i }).click()
-  // Espera a Home montar (fim da transição) antes de checar a lista.
-  await expect(page.getByRole('button', { name: /criar novo/i })).toBeVisible()
-  await expect(page.getByRole('heading', { name: /seus projetos/i })).toBeVisible()
+  await expect(page.getByText(/importar fotos/i)).toBeVisible()
+  await page.getByRole('button', { name: /projetos/i }).click()
   await expect(page.locator('.project-card__name')).toContainText(/novo carrossel/i)
 
   expect(errors).toEqual([])
@@ -103,18 +125,19 @@ test('fluxo completo: criar carrossel → editor → persiste → exporta', asyn
 test('template automático: escolhe o layout pela quantidade de fotos', async ({ page }) => {
   const errors = guardPageErrors(page)
   await page.goto(APP)
+  await importLibrary(page, [IMG, SMALL, SMALL, SMALL])
+  await page.getByRole('button', { name: /^selecionar$/i }).click()
+  const cells = page.locator('.library-grid__item--btn')
+  const n = await cells.count()
+  for (let i = 0; i < n; i++) await cells.nth(i).click()
+  await page.getByRole('button', { name: /criar projeto \(/i }).click()
 
-  await page.getByRole('button', { name: /criar novo/i }).click()
+  // menu de criação sem etapa de fotos: escolhe formato e "Automático"
   await page.getByRole('button', { name: /quadrado/i }).click()
-  // escolhe "Automático" em vez de um template específico
+  await expect(page.getByText(/fotos da biblioteca/i)).toBeVisible()
   await page.getByRole('button', { name: /automático/i }).click()
 
-  await expect(page.getByRole('heading', { name: /selecione suas fotos/i })).toBeVisible()
-  await expect(page.getByText(/escolhemos o melhor layout/i)).toBeVisible()
-  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL])
-  await page.getByRole('button', { name: /criar projeto/i }).click()
-
-  // Editor montou com um layout escolhido automaticamente para 4 fotos.
+  // Editor montou com um layout escolhido automaticamente para as fotos.
   await expect(page.locator('canvas')).toBeVisible()
   await expect(page.getByRole('button', { name: /^exportar$/i })).toBeVisible()
 
@@ -122,44 +145,16 @@ test('template automático: escolhe o layout pela quantidade de fotos', async ({
 })
 
 test('seleciona uma foto da colagem e abre o painel da foto', async ({ page }) => {
-  await page.goto(APP)
-  await page.getByRole('button', { name: /criar novo/i }).click()
-  await page.getByRole('button', { name: /quadrado/i }).click()
-  await page.getByRole('button', { name: 'post-trio-scatter' }).click()
-  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL])
-  await page.getByRole('button', { name: /criar projeto/i }).click()
-
-  await expect(page.locator('canvas')).toBeVisible()
-  // toca no centro do palco para selecionar uma foto de colagem
+  await createTrioProject(page)
   const box = await page.locator('canvas').boundingBox()
   if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
   await expect(page.getByRole('heading', { name: /^foto$/i })).toBeVisible()
 })
 
-// Helper: cria um projeto post-trio-scatter (3 slots) com 4 fotos e entra no editor.
-async function createTrioProject(page: Page) {
-  await page.goto(APP)
-  await page.getByRole('button', { name: /criar novo/i }).click()
-  await page.getByRole('button', { name: /quadrado/i }).click()
-  await page.getByRole('button', { name: 'post-trio-scatter' }).click()
-  // o passo de fotos indica a capacidade (slots + fundo opcional = 4)
-  await expect(page.getByText(/comporta até 4 fotos/i)).toBeVisible()
-  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL])
-  await expect(page.getByText(/4 fotos selecionadas/i)).toBeVisible()
-  await page.getByRole('button', { name: /criar projeto/i }).click()
-  await expect(page.locator('canvas')).toBeVisible()
-}
-
-async function selectCenterPhoto(page: Page) {
-  const box = await page.locator('canvas').boundingBox()
-  if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
-}
-
 test('adiciona mais fotos ao projeto durante a edição', async ({ page }) => {
   const errors = guardPageErrors(page)
   await createTrioProject(page)
 
-  // Painel de fundo mostra as miniaturas do pool. Conta as fotos atuais.
   await expect(page.getByText(/imagem de fundo/i)).toBeVisible()
   const photos = page.locator('.thumbs .thumb:not(.thumb--none):not(.thumb--add)')
   const before = await photos.count()
@@ -175,7 +170,6 @@ test('background começa vazio e pode ser escolhido entre as fotos', async ({ pa
   const errors = guardPageErrors(page)
   await createTrioProject(page)
 
-  // Sem foto selecionada => painel de fundo. Background começa vazio: paleta de cores visível.
   await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
   await expect(page.getByText(/imagem de fundo/i)).toBeVisible()
 
@@ -198,7 +192,6 @@ test('seleciona uma foto da colagem e consegue excluí-la', async ({ page }) => 
   await selectCenterPhoto(page)
   await expect(page.getByRole('heading', { name: /^foto$/i })).toBeVisible()
 
-  // Excluir foto fecha o painel da foto (volta ao painel de fundo).
   await page.getByRole('button', { name: /excluir foto/i }).click()
   await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
 
@@ -212,14 +205,11 @@ test('muda orientação do slot e enquadra a foto', async ({ page }) => {
   await selectCenterPhoto(page)
   await expect(page.getByRole('heading', { name: /^foto$/i })).toBeVisible()
 
-  // controles de orientação e enquadramento aparecem
   await expect(page.getByText(/orientação/i)).toBeVisible()
   await page.getByRole('button', { name: /paisagem/i }).click()
   await expect(page.getByText(/enquadrar a foto/i)).toBeVisible()
-  // ajusta o enquadramento sem erros (sliders de zoom/posição)
   await expect(page.getByText('Posição X')).toBeVisible()
 
-  // seletor de arraste: começa em "Enquadrar"; arrastar a foto reenquadra sem erro
   await expect(page.getByText(/ao arrastar a foto/i)).toBeVisible()
   await expect(page.getByRole('button', { name: /^enquadrar$/i })).toBeVisible()
   const cbox = await page.locator('canvas').boundingBox()
@@ -229,7 +219,6 @@ test('muda orientação do slot e enquadra a foto', async ({ page }) => {
     await page.mouse.move(cbox.x + cbox.width / 2 + 40, cbox.y + cbox.height / 2 + 20, { steps: 5 })
     await page.mouse.up()
   }
-  // alterna para "Mover slot"
   await page.getByRole('button', { name: /mover slot/i }).click()
 
   expect(errors).toEqual([])
@@ -242,7 +231,6 @@ test('clicar no fundo deseleciona a foto (volta ao painel de fundo)', async ({ p
   await selectCenterPhoto(page)
   await expect(page.getByRole('heading', { name: /^foto$/i })).toBeVisible()
 
-  // Clica num canto do palco (área de fundo, sem foto) => deve deselecionar.
   const box = await page.locator('canvas').boundingBox()
   if (box) await page.mouse.click(box.x + 6, box.y + 6)
   await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
@@ -253,23 +241,17 @@ test('clicar no fundo deseleciona a foto (volta ao painel de fundo)', async ({ p
 
 test('pré-visualização do carrossel abre, desliza e oferece exportar imagens', async ({ page }) => {
   const errors = guardPageErrors(page)
-  await page.goto(APP)
-  await page.getByRole('button', { name: /criar novo/i }).click()
-  await page.getByRole('button', { name: /quadrado/i }).click()
-  await page.getByRole('button', { name: 'carousel3-diagonal' }).click()
-  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL, SMALL, SMALL, SMALL])
-  await page.getByRole('button', { name: /criar projeto/i }).click()
-  await expect(page.locator('canvas')).toBeVisible()
+  await createFromLibrary(page, {
+    template: 'carousel3-diagonal',
+    files: [IMG, SMALL, SMALL, SMALL, SMALL, SMALL, SMALL],
+  })
 
   await page.getByRole('button', { name: /pré-visualizar/i }).click()
-  // o overlay renderiza as 3 páginas como imagens
   const slides = page.locator('.preview-slide img')
   await expect(slides).toHaveCount(3)
   await expect(slides.first()).toBeVisible()
-  // ação final de exportar/compartilhar imagens disponível no preview
   await expect(page.getByRole('button', { name: /salvar \/ compartilhar imagens/i })).toBeVisible()
 
-  // fecha o preview
   await page.getByRole('dialog').getByRole('button').first().click()
   await expect(page.locator('.preview-overlay')).toHaveCount(0)
 
@@ -278,13 +260,7 @@ test('pré-visualização do carrossel abre, desliza e oferece exportar imagens'
 
 test('renomeia o projeto e vê data, template e nº de fotos na listagem', async ({ page }) => {
   const errors = guardPageErrors(page)
-  await page.goto(APP)
-  await page.getByRole('button', { name: /criar novo/i }).click()
-  await page.getByRole('button', { name: /quadrado/i }).click()
-  await page.getByRole('button', { name: 'post-trio-scatter' }).click()
-  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL])
-  await page.getByRole('button', { name: /criar projeto/i }).click()
-  await expect(page.locator('canvas')).toBeVisible()
+  await createFromLibrary(page, { template: 'post-trio-scatter', files: [IMG, SMALL, SMALL] })
 
   // renomeia pelo título da barra
   await page.getByRole('button', { name: /renomear projeto/i }).click()
@@ -293,9 +269,10 @@ test('renomeia o projeto e vê data, template e nº de fotos na listagem', async
   await input.press('Enter')
   await expect(page.getByRole('button', { name: /renomear projeto/i })).toHaveText('Minha Viagem')
 
-  // volta à home: card mostra nome, template e nº de fotos
+  // volta à home, abre a aba Projetos: card mostra nome, template e nº de fotos
   await page.getByRole('button', { name: /voltar para o início/i }).click()
-  await expect(page.getByRole('button', { name: /criar novo/i })).toBeVisible()
+  await expect(page.getByText(/importar fotos/i)).toBeVisible()
+  await page.getByRole('button', { name: /projetos/i }).click()
   await expect(page.locator('.project-card__name')).toContainText('Minha Viagem')
   await expect(page.locator('.project-card__tags')).toContainText('post-trio-scatter')
   await expect(page.locator('.project-card__meta')).toContainText(/3 fotos/i)
@@ -313,13 +290,7 @@ test('renomeia o projeto e vê data, template e nº de fotos na listagem', async
 
 test('exportar é a ação principal e oferece imagens ou arquivo do projeto', async ({ page }) => {
   const errors = guardPageErrors(page)
-  await page.goto(APP)
-  await page.getByRole('button', { name: /criar novo/i }).click()
-  await page.getByRole('button', { name: /quadrado/i }).click()
-  await page.getByRole('button', { name: 'post-trio-scatter' }).click()
-  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL])
-  await page.getByRole('button', { name: /criar projeto/i }).click()
-  await expect(page.locator('canvas')).toBeVisible()
+  await createFromLibrary(page, { template: 'post-trio-scatter', files: [IMG, SMALL, SMALL] })
 
   // a ação principal "Exportar" abre o seletor com as duas opções
   await page.getByRole('button', { name: /^exportar$/i }).click()
@@ -335,17 +306,13 @@ test('exportar é a ação principal e oferece imagens ou arquivo do projeto', a
   expect(errors).toEqual([])
 })
 
-test('sugestões: importa em massa, agrupa por dia e cria carrossel pronto', async ({ page }) => {
+test('biblioteca: importa em massa, sugere posts prontos e cria carrossel', async ({ page }) => {
   const errors = guardPageErrors(page)
   await page.goto(APP)
 
-  // entra na tela de sugestões pela home
-  await page.getByRole('button', { name: /sugestões por data e lugar/i }).click()
-  await expect(page.getByText(/adicione fotos e o app agrupa/i)).toBeVisible()
-
   // importa 3 fotos (sem EXIF => caem no mesmo dia via lastModified do arquivo)
-  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL])
-  await expect(page.getByText(/momento(s)? encontrado/i)).toBeVisible()
+  await importLibrary(page, [IMG, SMALL, SMALL])
+  await expect(page.getByText(/prontos para postar/i)).toBeVisible()
   await expect(page.locator('.suggestion-card')).toHaveCount(1)
   await expect(page.locator('.suggestion-card__meta')).toContainText(/3 fotos/i)
 
@@ -353,26 +320,27 @@ test('sugestões: importa em massa, agrupa por dia e cria carrossel pronto', asy
   await page.getByRole('button', { name: /criar carrossel/i }).click()
   await expect(page.locator('canvas')).toBeVisible()
   await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
-  // pool tem as 3 fotos (miniaturas além de "Nenhum" e do "+")
   await expect(page.locator('.thumbs .thumb:not(.thumb--none):not(.thumb--add)')).toHaveCount(3)
 
-  // a biblioteca persiste: a home passa a mostrar "Momentos recentes"
+  // a biblioteca persiste: ao voltar, a sugestão continua lá
   await page.getByRole('button', { name: /voltar para o início/i }).click()
-  await expect(page.getByText(/momentos recentes/i)).toBeVisible()
-  await expect(page.locator('.suggestion-card')).toHaveCount(1)
-  // "Ver todos" leva à tela completa de sugestões
-  await page.getByRole('button', { name: /ver todos/i }).click()
+  await expect(page.getByText(/prontos para postar/i)).toBeVisible()
   await expect(page.locator('.suggestion-card')).toHaveCount(1)
 
   expect(errors).toEqual([])
 })
 
-test('sugestões: dispensa/restaura e gerencia a biblioteca', async ({ page }) => {
+test('biblioteca: alterna dia/lugar, dispensa/restaura sugestão e remove por seleção', async ({
+  page,
+}) => {
   const errors = guardPageErrors(page)
   await page.goto(APP)
-  await page.getByRole('button', { name: /sugestões por data e lugar/i }).click()
-  await page.setInputFiles('input[type=file]', [IMG, SMALL])
+  await importLibrary(page, [IMG, SMALL])
   await expect(page.locator('.suggestion-card')).toHaveCount(1)
+
+  // alterna o agrupamento da grade entre Dia e Lugar
+  await page.getByRole('button', { name: /^lugar$/i }).click()
+  await page.getByRole('button', { name: /^dia$/i }).click()
 
   // dispensa a sugestão => some; restaurar => volta
   await page.getByRole('button', { name: /dispensar sugestão/i }).click()
@@ -380,12 +348,13 @@ test('sugestões: dispensa/restaura e gerencia a biblioteca', async ({ page }) =
   await page.getByRole('button', { name: /restaurar 1 sugestão/i }).click()
   await expect(page.locator('.suggestion-card')).toHaveCount(1)
 
-  // gerenciar: limpa a biblioteca inteira (aceita o confirm) => estado vazio
-  page.once('dialog', (dialog) => void dialog.accept())
-  await page.getByRole('button', { name: /gerenciar/i }).click()
-  await expect(page.getByText(/2 fotos na biblioteca/i)).toBeVisible()
-  await page.getByRole('button', { name: /limpar tudo/i }).click()
-  await expect(page.getByText(/adicione fotos e o app agrupa/i)).toBeVisible()
+  // seleção múltipla: seleciona tudo e remove => biblioteca vazia
+  await page.getByRole('button', { name: /^selecionar$/i }).click()
+  const cells = page.locator('.library-grid__item--btn')
+  const n = await cells.count()
+  for (let i = 0; i < n; i++) await cells.nth(i).click()
+  await page.getByRole('button', { name: /remover \d/i }).click()
+  await expect(page.getByText(/importe suas fotos e o app agrupa/i)).toBeVisible()
 
   expect(errors).toEqual([])
 })
@@ -395,7 +364,6 @@ test('resiliência: projeto em formato antigo não causa tela branca', async ({ 
   await page.goto(APP)
 
   // Injeta um projeto no formato pré-refactor (background por página).
-  // Abre sem versão fixa: usa a versão atual do schema (o app já criou o DB).
   await page.evaluate(async () => {
     const req = indexedDB.open('post-maker')
     await new Promise((res, rej) => {
@@ -441,7 +409,6 @@ test('resiliência: projeto em formato antigo não causa tela branca', async ({ 
   })
 
   await page.goto('/post-maker/#/editor/legacy1')
-  // Deve renderizar o editor (não tela branca nem fallback de erro).
   await expect(page.getByRole('button', { name: /exportar/i })).toBeVisible()
   await expect(page.locator('canvas')).toBeVisible()
   await expect(page.getByText(/algo deu errado/i)).toHaveCount(0)

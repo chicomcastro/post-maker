@@ -173,6 +173,104 @@ export function clusterByPlaceAcrossDays(
 }
 
 /**
+ * Agrupa TODA a biblioteca por dia local — um grupo por dia, com todas as fotos
+ * daquele dia (independente de lugar). Para a grade navegável da biblioteca, não
+ * para sugestões. Grupos e fotos mais recentes primeiro.
+ */
+export function groupByDay(photos: LibraryPhoto[]): SuggestionGroup[] {
+  const byDay = new Map<string, LibraryPhoto[]>()
+  for (const photo of photos) {
+    const day = localDay(photo.takenAt)
+    const list = byDay.get(day)
+    if (list) list.push(photo)
+    else byDay.set(day, [photo])
+  }
+
+  const groups: SuggestionGroup[] = []
+  for (const [day, dayPhotos] of byDay) {
+    const sorted = [...dayPhotos].sort((a, b) => b.takenAt - a.takenAt)
+    const located = sorted.filter((p) => typeof p.lat === 'number' && typeof p.lon === 'number')
+    const lat = located.length
+      ? located.reduce((s, p) => s + p.lat!, 0) / located.length
+      : undefined
+    const lon = located.length
+      ? located.reduce((s, p) => s + p.lon!, 0) / located.length
+      : undefined
+    groups.push({
+      key: `day:${day}`,
+      day,
+      days: [day],
+      takenAt: sorted[0].takenAt,
+      lat,
+      lon,
+      place: sorted.find((p) => p.place)?.place,
+      photos: sorted,
+    })
+  }
+  return groups.sort((a, b) => b.takenAt - a.takenAt)
+}
+
+/**
+ * Agrupa TODA a biblioteca por lugar — clusters por proximidade IGNORANDO o dia
+ * (todas as revisitas juntas), mais um grupo "Sem local" para fotos sem GPS.
+ * Para a grade navegável da biblioteca. Grupos e fotos mais recentes primeiro.
+ */
+export function groupByPlace(
+  photos: LibraryPhoto[],
+  maxKm: number = SAME_PLACE_KM,
+): SuggestionGroup[] {
+  const sorted = [...photos].sort((a, b) => b.takenAt - a.takenAt)
+  const clusters: { latSum: number; lonSum: number; photos: LibraryPhoto[] }[] = []
+  const noGps: LibraryPhoto[] = []
+
+  for (const photo of sorted) {
+    if (typeof photo.lat !== 'number' || typeof photo.lon !== 'number') {
+      noGps.push(photo)
+      continue
+    }
+    const home = clusters.find((c) => {
+      const n = c.photos.length
+      return haversineKm(c.latSum / n, c.lonSum / n, photo.lat!, photo.lon!) <= maxKm
+    })
+    if (home) {
+      home.latSum += photo.lat
+      home.lonSum += photo.lon
+      home.photos.push(photo)
+    } else {
+      clusters.push({ latSum: photo.lat, lonSum: photo.lon, photos: [photo] })
+    }
+  }
+
+  const groups: SuggestionGroup[] = []
+  for (const c of clusters) {
+    const days = [...new Set(c.photos.map((p) => localDay(p.takenAt)))].sort()
+    const lat = c.latSum / c.photos.length
+    const lon = c.lonSum / c.photos.length
+    groups.push({
+      key: `place:${centerKey(lat, lon)}`,
+      day: days[days.length - 1],
+      days,
+      takenAt: c.photos[0].takenAt,
+      lat,
+      lon,
+      place: c.photos.find((p) => p.place)?.place,
+      photos: c.photos,
+    })
+  }
+  if (noGps.length) {
+    const days = [...new Set(noGps.map((p) => localDay(p.takenAt)))].sort()
+    groups.push({
+      key: 'place:nogps',
+      day: days[days.length - 1],
+      days,
+      takenAt: noGps[0].takenAt,
+      photos: noGps,
+    })
+  }
+  return groups.sort((a, b) => b.takenAt - a.takenAt)
+}
+
+/**
  * Sugere um template para N fotos: reserva 1 para o fundo e procura o template
  * cujo nº de slots de colagem melhor aproxima o restante (desempate: menos
  * páginas primeiro — carrosséis enxutos).

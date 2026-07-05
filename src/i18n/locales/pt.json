@@ -49,6 +49,24 @@
     "clearConfirm": "Limpar toda a biblioteca de sugestões? Os projetos existentes não são afetados.",
     "create": "Criar carrossel"
   },
+  "library": {
+    "tabLibrary": "Biblioteca",
+    "tabProjects": "Projetos",
+    "import": "Importar fotos",
+    "empty": "Importe suas fotos e o app agrupa por dia e lugar, sugerindo carrosséis prontos.",
+    "byDay": "Dia",
+    "byPlace": "Lugar",
+    "select": "Selecionar",
+    "selectHint": "Toque e segure uma foto para selecionar",
+    "readyPosts": "Prontos para postar",
+    "createSelected_one": "Criar projeto ({{count}})",
+    "createSelected_other": "Criar projeto ({{count}})",
+    "removeSelected_one": "Remover {{count}}",
+    "removeSelected_other": "Remover {{count}}",
+    "clearSelection": "Limpar seleção",
+    "clearAll": "Limpar biblioteca",
+    "noProjects": "Selecione fotos da biblioteca para criar seu primeiro carrossel."
+  },
   "language": {
     "label": "Idioma",
     "pt": "Português",
@@ -78,6 +96,8 @@
     "dropHint": "Arraste fotos aqui ou toque para escolher",
     "selectedCount_one": "{{count}} foto selecionada",
     "selectedCount_other": "{{count}} fotos selecionadas",
+    "preselectedCount_one": "{{count}} foto da biblioteca. Escolha o layout.",
+    "preselectedCount_other": "{{count}} fotos da biblioteca. Escolha o layout.",
     "photosHint_one": "Este layout comporta até {{count}} foto (uma pode virar fundo). Adicione quantas quiser e escolha quais entram durante a edição.",
     "photosHint_other": "Este layout comporta até {{count}} fotos (uma pode virar fundo). Adicione quantas quiser e escolha quais entram durante a edição.",
     "convertingHeic": "Convertendo fotos do iPhone…",
