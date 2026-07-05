@@ -1,9 +1,8 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Home } from './pages/Home'
+import { LibraryHome } from './pages/LibraryHome'
 import { NewProject } from './features/create/NewProject'
 import { EditorPage } from './features/editor/EditorPage'
-import { SuggestionsPage } from './features/suggestions/SuggestionsPage'
 
 const variants = {
   enter: { x: '100%' },
@@ -26,9 +25,8 @@ export function App() {
           transition={{ type: 'tween', ease: [0.32, 0.72, 0, 1], duration: 0.3 }}
         >
           <Routes location={location}>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<LibraryHome />} />
             <Route path="/new" element={<NewProject />} />
-            <Route path="/suggestions" element={<SuggestionsPage />} />
             <Route path="/editor/:id" element={<EditorPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

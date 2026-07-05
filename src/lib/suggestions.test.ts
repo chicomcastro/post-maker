@@ -3,6 +3,8 @@ import { describe, it, expect } from 'vitest'
 import {
   clusterByDayAndPlace,
   clusterByPlaceAcrossDays,
+  groupByDay,
+  groupByPlace,
   chooseTemplateFor,
   haversineKm,
   localDay,
@@ -117,6 +119,65 @@ describe('clusterByPlaceAcrossDays', () => {
 
   it('ignora fotos sem GPS', () => {
     expect(clusterByPlaceAcrossDays([photo('a', DAY1), photo('b', DAY2)])).toHaveLength(0)
+  })
+})
+
+describe('groupByDay', () => {
+  it('um grupo por dia com TODAS as fotos do dia (independente do lugar)', () => {
+    const groups = groupByDay([
+      photo('a', DAY1, -3.1, -60.02),
+      photo('b', DAY1 + 3600e3, -9.0, -35.2), // outro lugar, mesmo dia
+      photo('c', DAY2, -3.1, -60.02),
+    ])
+    expect(groups).toHaveLength(2)
+    const first = groups[0]
+    expect(first.day).toBe('2026-06-28') // mais recente primeiro
+    const older = groups[1]
+    expect(older.photos).toHaveLength(2) // a + b juntas apesar de lugares distantes
+  })
+
+  it('ordena fotos mais recentes primeiro dentro do grupo', () => {
+    const [group] = groupByDay([photo('a', DAY1), photo('b', DAY1 + 3600e3)])
+    expect(group.photos.map((p) => p.assetId)).toEqual(['b', 'a'])
+  })
+
+  it('inclui dias sem GPS (lat/lon indefinidos)', () => {
+    const [group] = groupByDay([photo('a', DAY1), photo('b', DAY1)])
+    expect(group.lat).toBeUndefined()
+    expect(group.photos).toHaveLength(2)
+  })
+})
+
+describe('groupByPlace', () => {
+  it('junta revisitas do mesmo lugar em dias diferentes (ignora o dia)', () => {
+    const groups = groupByPlace([
+      photo('a', DAY1, -3.1, -60.02),
+      photo('b', DAY2, -3.101, -60.021),
+      photo('c', DAY1, -9.0, -35.2), // outro lugar
+    ])
+    expect(groups).toHaveLength(2)
+    const big = groups.find((g) => g.photos.length === 2)!
+    expect(big.days).toEqual(['2026-06-27', '2026-06-28'])
+  })
+
+  it('agrupa fotos sem GPS num grupo "Sem local"', () => {
+    const groups = groupByPlace([
+      photo('a', DAY1),
+      photo('b', DAY2),
+      photo('c', DAY1, -3.1, -60.02),
+    ])
+    const noGps = groups.find((g) => g.key === 'place:nogps')!
+    expect(noGps.photos).toHaveLength(2)
+    expect(noGps.lat).toBeUndefined()
+  })
+
+  it('mantém séries de um único dia (ao contrário das sugestões)', () => {
+    const groups = groupByPlace([
+      photo('a', DAY1, -3.1, -60.02),
+      photo('b', DAY1 + 3600e3, -3.101, -60.021),
+    ])
+    expect(groups).toHaveLength(1)
+    expect(groups[0].photos).toHaveLength(2)
   })
 })
 

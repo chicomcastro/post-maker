@@ -34,3 +34,4 @@ Formato: Contexto · Decisão · Consequências · Status.
 | [0025](0025-series-por-lugar-dispensa-e-biblioteca.md)    | Séries por lugar, dispensa e gestão da biblioteca     | Aceito |
 | [0026](0026-template-automatico-na-criacao.md)            | Template automático na criação (pela qtd. de fotos)   | Aceito |
 | [0027](0027-momentos-na-home.md)                          | Momentos recentes na home (quando há biblioteca)      | Aceito |
+| [0028](0028-biblioteca-como-home.md)                      | Biblioteca como tela inicial (app centrado em fotos)  | Aceito |
