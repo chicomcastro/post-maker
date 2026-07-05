@@ -347,9 +347,78 @@ a {
 }
 /* CTA principal da home: criar novo projeto. */
 .home-create {
-  margin: 14px 0 22px;
+  margin: 14px 0 10px;
   font-size: 1.05rem;
   padding: 1rem;
+}
+.home-suggest {
+  margin: 0 0 22px;
+}
+
+/* ===== Sugestões (agrupamento por dia/lugar) ===== */
+.suggestions__drop {
+  margin-bottom: 18px;
+}
+.suggestions__drop small {
+  font-size: 0.78rem;
+}
+.suggestions__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.suggestions__bar .section-title {
+  margin: 0;
+}
+.suggestion-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.suggestion-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.suggestion-card__thumbs {
+  display: grid;
+  grid-template-columns: repeat(2, 27px);
+  grid-auto-rows: 27px;
+  gap: 3px;
+  flex: 0 0 auto;
+}
+.suggestion-card__thumb {
+  border-radius: 7px;
+  background-color: var(--dark);
+  background-size: cover;
+  background-position: center;
+}
+.suggestion-card__body {
+  flex: 1;
+  min-width: 0;
+}
+.suggestion-card__title {
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.suggestion-card__meta {
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.suggestion-card .btn {
+  flex: 0 0 auto;
 }
 .section-title {
   font-size: 0.82rem;
@@ -1131,10 +1200,14 @@ input[type='range']::-moz-range-thumb {
 
   /* CTA com largura natural (não esticado de ponta a ponta) no desktop. */
   .hero .btn--block,
-  .home-create {
+  .home-create,
+  .home-suggest {
     width: auto;
     padding-left: 2.2rem;
     padding-right: 2.2rem;
+  }
+  .home-suggest {
+    margin-left: 10px;
   }
   .bottom-cta {
     display: flex;

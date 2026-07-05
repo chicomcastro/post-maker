@@ -10,6 +10,9 @@ import {
   putAsset,
   getAsset,
   pruneOrphanAssets,
+  putLibraryPhotos,
+  listLibraryPhotos,
+  setLibraryPlaces,
   _resetDbForTests,
 } from './storage'
 import { createProjectFromTemplate, distributePhotos } from './project-factory'
@@ -56,5 +59,35 @@ describe('storage', () => {
     expect(removed).toBe(1)
     expect(await getAsset('orphan')).toBeUndefined()
     expect(await getAsset('used-bg')).toBeDefined()
+  })
+})
+
+describe('biblioteca de fotos', () => {
+  it('guarda metadados e lista da mais recente para a mais antiga', async () => {
+    await putLibraryPhotos([
+      { assetId: 'a', takenAt: 1000, lat: -3.1, lon: -60, addedAt: 1 },
+      { assetId: 'b', takenAt: 2000, addedAt: 1 },
+    ])
+    const list = await listLibraryPhotos()
+    expect(list.map((p) => p.assetId)).toEqual(['b', 'a'])
+    expect(list[1].lat).toBeCloseTo(-3.1)
+  })
+
+  it('grava nomes de lugares por assetId', async () => {
+    await putLibraryPhotos([{ assetId: 'a', takenAt: 1000, addedAt: 1 }])
+    await setLibraryPlaces(new Map([['a', 'Manaus, Amazonas']]))
+    const [photo] = await listLibraryPhotos()
+    expect(photo.place).toBe('Manaus, Amazonas')
+  })
+
+  it('prune preserva assets referenciados só pela biblioteca', async () => {
+    await putAsset('lib-only', new Blob(['x']))
+    await putAsset('orphan', new Blob(['y']))
+    await putLibraryPhotos([{ assetId: 'lib-only', takenAt: 1, addedAt: 1 }])
+
+    const removed = await pruneOrphanAssets()
+    expect(removed).toBe(1)
+    expect(await getAsset('lib-only')).toBeDefined()
+    expect(await getAsset('orphan')).toBeUndefined()
   })
 })

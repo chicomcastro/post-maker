@@ -18,6 +18,8 @@ de graça, e **suas fotos nunca saem do seu aparelho**.
 
 - 🖼️ **Colagem com fundo opcional**: monte a colagem e, quando quiser, escolha
   qualquer foto como **fundo compartilhado** do carrossel — ou nenhuma.
+- ✨ **Sugestões automáticas**: suba fotos em massa e o app agrupa **por dia e
+  por lugar** (EXIF, analisado no seu aparelho) e sugere carrosséis prontos.
 - 🎠 **Posts e carrosséis** de 1 a 4 páginas, prontos para o feed.
 - 🎨 **Templates lindos e personalizáveis** — mexa, incline e redimensione cada
   foto à vontade.

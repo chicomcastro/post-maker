@@ -314,13 +314,43 @@ test('exportar é a ação principal e oferece imagens ou arquivo do projeto', a
   expect(errors).toEqual([])
 })
 
+test('sugestões: importa em massa, agrupa por dia e cria carrossel pronto', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await page.goto(APP)
+
+  // entra na tela de sugestões pela home
+  await page.getByRole('button', { name: /sugestões por data e lugar/i }).click()
+  await expect(page.getByText(/adicione fotos e o app agrupa/i)).toBeVisible()
+
+  // importa 3 fotos (sem EXIF => caem no mesmo dia via lastModified do arquivo)
+  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL])
+  await expect(page.getByText(/momento(s)? encontrado/i)).toBeVisible()
+  await expect(page.locator('.suggestion-card')).toHaveCount(1)
+  await expect(page.locator('.suggestion-card__meta')).toContainText(/3 fotos/i)
+
+  // cria o carrossel a partir do grupo => abre o editor com as fotos no pool
+  await page.getByRole('button', { name: /criar carrossel/i }).click()
+  await expect(page.locator('canvas')).toBeVisible()
+  await expect(page.getByRole('heading', { name: /fundo/i })).toBeVisible()
+  // pool tem as 3 fotos (miniaturas além de "Nenhum" e do "+")
+  await expect(page.locator('.thumbs .thumb:not(.thumb--none):not(.thumb--add)')).toHaveCount(3)
+
+  // a biblioteca persiste: voltar à tela de sugestões mantém o grupo
+  await page.getByRole('button', { name: /voltar para o início/i }).click()
+  await page.getByRole('button', { name: /sugestões por data e lugar/i }).click()
+  await expect(page.locator('.suggestion-card')).toHaveCount(1)
+
+  expect(errors).toEqual([])
+})
+
 test('resiliência: projeto em formato antigo não causa tela branca', async ({ page }) => {
   const errors = guardPageErrors(page)
   await page.goto(APP)
 
   // Injeta um projeto no formato pré-refactor (background por página).
+  // Abre sem versão fixa: usa a versão atual do schema (o app já criou o DB).
   await page.evaluate(async () => {
-    const req = indexedDB.open('post-maker', 1)
+    const req = indexedDB.open('post-maker')
     await new Promise((res, rej) => {
       req.onsuccess = () => res(null)
       req.onerror = () => rej(req.error)

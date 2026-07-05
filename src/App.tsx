@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Home } from './pages/Home'
 import { NewProject } from './features/create/NewProject'
 import { EditorPage } from './features/editor/EditorPage'
+import { SuggestionsPage } from './features/suggestions/SuggestionsPage'
 
 const variants = {
   enter: { x: '100%' },
@@ -27,6 +28,7 @@ export function App() {
           <Routes location={location}>
             <Route path="/" element={<Home />} />
             <Route path="/new" element={<NewProject />} />
+            <Route path="/suggestions" element={<SuggestionsPage />} />
             <Route path="/editor/:id" element={<EditorPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

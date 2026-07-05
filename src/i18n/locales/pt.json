@@ -6,6 +6,7 @@
   "home": {
     "subtitle": "Monte carrosséis lindos para o Instagram em minutos. Suas fotos não saem do seu aparelho.",
     "create": "Criar novo projeto",
+    "suggestions": "Sugestões por data e lugar",
     "continue": "Continuar projeto",
     "noProjects": "Crie seu primeiro projeto para começar.",
     "yourProjects": "Seus projetos",
@@ -16,6 +17,21 @@
     "pageCount_other": "{{count}} páginas",
     "photoCount_one": "{{count}} foto",
     "photoCount_other": "{{count}} fotos"
+  },
+  "suggestions": {
+    "title": "Sugestões de post",
+    "dropHint": "Adicione fotos da sua biblioteca (pode selecionar várias)",
+    "privacy": "Tudo é analisado no seu aparelho — as fotos não saem dele.",
+    "importing": "Importando {{done}}/{{total}}…",
+    "naming": "Buscando nomes dos lugares…",
+    "empty": "Adicione fotos e o app agrupa por dia e lugar, sugerindo carrosséis prontos.",
+    "groups_one": "{{count}} momento encontrado",
+    "groups_other": "{{count}} momentos encontrados",
+    "namePlaces": "Nomear lugares",
+    "noPlace": "Sem local",
+    "somewhere": "Passeio",
+    "projectName": "{{place}} — {{date}}",
+    "create": "Criar carrossel"
   },
   "language": {
     "label": "Idioma",
