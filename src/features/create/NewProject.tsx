@@ -10,10 +10,11 @@ import {
 } from '../../templates/catalog'
 import { TemplatePreview } from '../../components/TemplatePreview'
 import { AppBar, IconButton } from '../../components/ui'
-import { ChevronLeft, ImagePlus } from '../../components/icons'
+import { ChevronLeft, ImagePlus, Sparkle } from '../../components/icons'
 import { isImageFile } from '../../lib/images'
 import { importFiles } from '../../lib/asset-import'
 import { createProjectFromTemplate, distributePhotos } from '../../lib/project-factory'
+import { chooseTemplateFor } from '../../lib/suggestions'
 import { saveProject } from '../../lib/storage'
 
 type Step = 'aspect' | 'template' | 'photos'
@@ -27,6 +28,8 @@ export function NewProject() {
   const [step, setStep] = useState<Step>('aspect')
   const [aspect, setAspect] = useState<AspectRatio | null>(null)
   const [template, setTemplate] = useState<Template | null>(null)
+  // Template automático: escolhido no fim pela quantidade de fotos.
+  const [auto, setAuto] = useState(false)
   const [filter, setFilter] = useState<Filter>('all')
   const [files, setFiles] = useState<File[]>([])
   const [busy, setBusy] = useState<string | null>(null)
@@ -45,7 +48,7 @@ export function NewProject() {
   }
 
   async function handleFinish() {
-    if (!template || !aspect) return
+    if ((!template && !auto) || !aspect) return
     if (files.length === 0) {
       setError(t('create.needPhoto'))
       return
@@ -55,7 +58,9 @@ export function NewProject() {
       const hasHeic = files.some((f) => /hei[cf]/i.test(f.type) || /\.(heic|heif)$/i.test(f.name))
       setBusy(hasHeic ? t('create.convertingHeic') : t('create.creating'))
       const assets = await importFiles(files)
-      const base = createProjectFromTemplate(template, { aspectRatio: aspect })
+      // Automático: escolhe o layout pela quantidade de fotos selecionadas.
+      const chosen = auto ? chooseTemplateFor(files.length) : template!
+      const base = createProjectFromTemplate(chosen, { aspectRatio: aspect })
       const { project } = distributePhotos(
         base,
         assets.map((a) => a.id),
@@ -118,6 +123,23 @@ export function NewProject() {
         {step === 'template' && (
           <section className="create__step">
             <h1>{t('create.stepTemplate')}</h1>
+
+            <button
+              type="button"
+              className="auto-template"
+              onClick={() => {
+                setAuto(true)
+                setTemplate(null)
+                setStep('photos')
+              }}
+            >
+              <Sparkle />
+              <span>
+                <strong>{t('create.autoTemplate')}</strong>
+                <small>{t('create.autoTemplateHint')}</small>
+              </span>
+            </button>
+
             <div className="segmented">
               {(['all', 'post', 'carousel'] as Filter[]).map((f) => (
                 <button
@@ -145,6 +167,7 @@ export function NewProject() {
                   aria-label={tpl.id}
                   onClick={() => {
                     setTemplate(tpl)
+                    setAuto(false)
                     setStep('photos')
                   }}
                 >
@@ -155,11 +178,13 @@ export function NewProject() {
           </section>
         )}
 
-        {step === 'photos' && template && (
+        {step === 'photos' && (template || auto) && (
           <section className="create__step">
             <h1>{t('create.stepPhotos')}</h1>
             <p className="muted create__hint">
-              {t('create.photosHint', { count: templatePhotoCapacity(template) })}
+              {auto
+                ? t('create.autoHint')
+                : t('create.photosHint', { count: templatePhotoCapacity(template!) })}
             </p>
             <PhotoPicker files={files} onChange={setFiles} />
             {error && <p className="error">{error}</p>}

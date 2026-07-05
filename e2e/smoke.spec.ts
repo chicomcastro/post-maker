@@ -100,6 +100,27 @@ test('fluxo completo: criar carrossel → editor → persiste → exporta', asyn
   expect(errors).toEqual([])
 })
 
+test('template automático: escolhe o layout pela quantidade de fotos', async ({ page }) => {
+  const errors = guardPageErrors(page)
+  await page.goto(APP)
+
+  await page.getByRole('button', { name: /criar novo/i }).click()
+  await page.getByRole('button', { name: /quadrado/i }).click()
+  // escolhe "Automático" em vez de um template específico
+  await page.getByRole('button', { name: /automático/i }).click()
+
+  await expect(page.getByRole('heading', { name: /selecione suas fotos/i })).toBeVisible()
+  await expect(page.getByText(/escolhemos o melhor layout/i)).toBeVisible()
+  await page.setInputFiles('input[type=file]', [IMG, SMALL, SMALL, SMALL])
+  await page.getByRole('button', { name: /criar projeto/i }).click()
+
+  // Editor montou com um layout escolhido automaticamente para 4 fotos.
+  await expect(page.locator('canvas')).toBeVisible()
+  await expect(page.getByRole('button', { name: /^exportar$/i })).toBeVisible()
+
+  expect(errors).toEqual([])
+})
+
 test('seleciona uma foto da colagem e abre o painel da foto', async ({ page }) => {
   await page.goto(APP)
   await page.getByRole('button', { name: /criar novo/i }).click()

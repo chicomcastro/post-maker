@@ -61,6 +61,9 @@
     "stepAspect": "Choose the format",
     "stepTemplate": "Choose a template",
     "stepPhotos": "Select your photos",
+    "autoTemplate": "Automatic",
+    "autoTemplateHint": "We pick the layout from how many photos you choose",
+    "autoHint": "We'll pick the best layout based on how many photos you select.",
     "aspect": {
       "4:5": "Feed (4:5)",
       "1:1": "Square (1:1)",
