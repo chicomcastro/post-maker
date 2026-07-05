@@ -518,8 +518,8 @@ function PhotoControls({
               label={t('editor.border')}
               value={photo.style.borderWidth}
               min={0}
-              max={12}
-              step={1}
+              max={48}
+              step={2}
               onChange={(v) => update((p) => ({ ...p, style: { ...p.style, borderWidth: v } }))}
             />
             <Slider

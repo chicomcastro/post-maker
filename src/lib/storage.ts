@@ -144,6 +144,12 @@ export async function removeLibraryPhoto(assetId: string): Promise<void> {
   await db.delete('library', assetId)
 }
 
+/** Esvazia a biblioteca (os assets órfãos são removidos pelo prune). */
+export async function clearLibrary(): Promise<void> {
+  const db = await getDB()
+  await db.clear('library')
+}
+
 /**
  * Remove assets que não são referenciados por nenhum projeto NEM pela
  * biblioteca de fotos.

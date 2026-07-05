@@ -43,15 +43,20 @@ export const NEUTRAL_ADJUSTMENTS: Adjustments = {
   saturation: 1,
 }
 
+/** Largura nominal de exportação (px); todas as proporções usam 1080. */
+export const EXPORT_NOMINAL_WIDTH = 1080
+
 /** Estilo visual de uma foto de colagem. */
 export interface PhotoStyle {
+  /** Largura da moldura em px NOMINAIS de exportação (1080 de largura). */
   borderWidth: number
   borderColor: string
   shadow: boolean
 }
 
+/** Moldura branca por padrão: destaca a foto do fundo (estilo polaroid). */
 export const DEFAULT_PHOTO_STYLE: PhotoStyle = {
-  borderWidth: 0,
+  borderWidth: 16,
   borderColor: '#ffffff',
   shadow: true,
 }

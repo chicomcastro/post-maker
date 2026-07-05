@@ -8,10 +8,15 @@ import { TEMPLATES, templateCollageCount, type Template } from '../templates/cat
 export const SAME_PLACE_KM = 2
 
 export interface SuggestionGroup {
-  /** Chave estável (dia + índice do cluster). */
+  /**
+   * Chave estável POR CONTEÚDO (dia/lugar + centro arredondado), para a
+   * dispensa persistir mesmo quando novas fotos entram no grupo.
+   */
   key: string
   /** Dia local no formato YYYY-MM-DD (ordena bem). */
   day: string
+  /** Dias distintos cobertos (séries por lugar têm vários). */
+  days: string[]
   /** Timestamp representativo (primeira foto do grupo). */
   takenAt: number
   /** Centro do cluster (média), quando há GPS. */
@@ -20,6 +25,11 @@ export interface SuggestionGroup {
   /** Nome do lugar, se alguma foto do grupo já foi geocodificada. */
   place?: string
   photos: LibraryPhoto[]
+}
+
+/** Centro arredondado (~1km) para compor chaves estáveis. */
+function centerKey(lat: number, lon: number): string {
+  return `${lat.toFixed(2)},${lon.toFixed(2)}`
 }
 
 /** Dia local (YYYY-MM-DD) de um timestamp. */
@@ -85,21 +95,25 @@ export function clusterByDayAndPlace(
       }
     }
 
-    clusters.forEach((c, i) => {
+    for (const c of clusters) {
+      const lat = c.latSum / c.located
+      const lon = c.lonSum / c.located
       groups.push({
-        key: `${day}#${i}`,
+        key: `${day}@${centerKey(lat, lon)}`,
         day,
+        days: [day],
         takenAt: c.photos[0].takenAt,
-        lat: c.latSum / c.located,
-        lon: c.lonSum / c.located,
+        lat,
+        lon,
         place: c.photos.find((p) => p.place)?.place,
         photos: c.photos,
       })
-    })
+    }
     if (noGps) {
       groups.push({
-        key: `${day}#nogps`,
+        key: `${day}@nogps`,
         day,
+        days: [day],
         takenAt: noGps[0].takenAt,
         place: noGps.find((p) => p.place)?.place,
         photos: noGps,
@@ -107,6 +121,54 @@ export function clusterByDayAndPlace(
     }
   }
 
+  return groups.sort((a, b) => b.takenAt - a.takenAt)
+}
+
+/**
+ * Séries por lugar: fotos com GPS agrupadas por proximidade IGNORANDO o dia.
+ * Só sugere clusters que atravessam 2+ dias distintos (o caso "mesmo lugar em
+ * datas diferentes" — revisitas). Fotos em ordem cronológica.
+ */
+export function clusterByPlaceAcrossDays(
+  photos: LibraryPhoto[],
+  maxKm: number = SAME_PLACE_KM,
+): SuggestionGroup[] {
+  const located = photos
+    .filter((p) => typeof p.lat === 'number' && typeof p.lon === 'number')
+    .sort((a, b) => a.takenAt - b.takenAt)
+
+  const clusters: { latSum: number; lonSum: number; photos: LibraryPhoto[] }[] = []
+  for (const photo of located) {
+    const home = clusters.find((c) => {
+      const n = c.photos.length
+      return haversineKm(c.latSum / n, c.lonSum / n, photo.lat!, photo.lon!) <= maxKm
+    })
+    if (home) {
+      home.latSum += photo.lat!
+      home.lonSum += photo.lon!
+      home.photos.push(photo)
+    } else {
+      clusters.push({ latSum: photo.lat!, lonSum: photo.lon!, photos: [photo] })
+    }
+  }
+
+  const groups: SuggestionGroup[] = []
+  for (const c of clusters) {
+    const days = [...new Set(c.photos.map((p) => localDay(p.takenAt)))].sort()
+    if (days.length < 2) continue
+    const lat = c.latSum / c.photos.length
+    const lon = c.lonSum / c.photos.length
+    groups.push({
+      key: `place@${centerKey(lat, lon)}`,
+      day: days[days.length - 1],
+      days,
+      takenAt: c.photos[c.photos.length - 1].takenAt,
+      lat,
+      lon,
+      place: c.photos.find((p) => p.place)?.place,
+      photos: c.photos,
+    })
+  }
   return groups.sort((a, b) => b.takenAt - a.takenAt)
 }
 

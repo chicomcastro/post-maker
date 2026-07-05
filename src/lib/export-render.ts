@@ -2,7 +2,13 @@
 // Reusa a mesma geometria do editor para fidelidade. Roda só no browser
 // (precisa de <canvas>), por isso fica fora da cobertura de testes.
 
-import { ASPECT_DIMENSIONS, type Adjustments, type Page, type Project } from '../types/project'
+import {
+  ASPECT_DIMENSIONS,
+  EXPORT_NOMINAL_WIDTH,
+  type Adjustments,
+  type Page,
+  type Project,
+} from '../types/project'
 import { getAsset } from './storage'
 import {
   adjustmentsToFilter,
@@ -149,7 +155,8 @@ export function renderPage(
     // Borda
     if (photo.style.borderWidth > 0) {
       roundedPath(ctx, x, y, rect.width, rect.height, cornerPx)
-      ctx.lineWidth = photo.style.borderWidth
+      // borderWidth é em px nominais (1080); aqui width == 1080, fator 1.
+      ctx.lineWidth = photo.style.borderWidth * (width / EXPORT_NOMINAL_WIDTH)
       ctx.strokeStyle = photo.style.borderColor
       ctx.stroke()
     }
